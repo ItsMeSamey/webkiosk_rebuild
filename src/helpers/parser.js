@@ -36,7 +36,7 @@ async function login(roll_number, password, is_parent){
   "method": "POST",
   "mode": "cors",
 });
-  const response =   fetch("https://webkiosk.thapar.edu/CommonFiles/UserAction.jsp", {
+  const response = fetch("https://webkiosk.thapar.edu/CommonFiles/UserAction.jsp", {
     "headers": {
       "accept": "*/*",
       "content-type": "application/x-www-form-urlencoded",
