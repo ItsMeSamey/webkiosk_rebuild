@@ -1,6 +1,4 @@
 #pragma once
-// #define VERBOSE
-// #define DEBUG
  
 void *get_auth_curl();
 char const *const authenticate(void *curl_void, char const *const roll_no, char *const password, char const user_type);
