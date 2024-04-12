@@ -43,16 +43,17 @@ char const* const get_content_type(char const * const filename){
 
 File get_file(char const * const filename) {
   struct stat file_stat;
+  File f = {NULL, 0};
   int fd = open(filename, O_RDONLY);
 
   if (fd == -1) {
     perror("An error occurred while opening the file");
-    return {NULL, 0};
+    return f;
   }
   if (fstat(fd, &file_stat) == -1) {
     perror("An error occurred while getting the file status");
     close(fd);
-    return {NULL, 0};
+    return f;
   }
   char buffer[1024+1];
   int occupied = snprintf(buffer, 1024, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %zu\r\n\r\n",
@@ -61,7 +62,9 @@ File get_file(char const * const filename) {
   strncpy(all, buffer, occupied);
   read(fd, all+occupied, file_stat.st_size);
   close(fd);
-  return {all, file_stat.st_size + occupied};
+  f.content = all;
+  f.len = file_stat.st_size + occupied;
+  return f;
 };
 
 File* get_file_list(){
