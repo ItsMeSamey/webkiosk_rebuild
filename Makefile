@@ -1,12 +1,19 @@
 
 
 CC = gcc
+JS = bun
 
 all: server
 
-./dist/server: c/server.c c/caller.h c/caller.c c/debug.h c/file_loader.h c/server_handler.h
-	$(CC) -o ./dist/server c/server.c -lpthread -lcurl
+frontend: src/*
+	$(JS) run build
+
+server: c/*
+	$(CC) -s -O2 -o ./dist/server c/server.c -lpthread -lcurl
+
+run: server frontend
+	cd dist && ./server
 
 clean:
-	rm -rf server dist/*
+	rm -rf dist/*
 
