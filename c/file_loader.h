@@ -72,7 +72,7 @@ File* get_file_list(){
   char filename_buff[1024+1];
   FILE *list;
 
-  file[0] = get_file("file_loader.c");
+  file[0] = get_file("index.html");
 
   list = popen("ls assets/*.js", "r");
   fscanf(list, "%[^ ^\n]", filename_buff);

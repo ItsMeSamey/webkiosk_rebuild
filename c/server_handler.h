@@ -46,6 +46,14 @@ void serve_file(int client_socket, const char* filename) {
     }
   }
 
+#ifdef DEBUG
+  int count = 0;
+#ifdef VERBOSE
+  count = printf("%s", ref->content);
+#endif
+  printf("File length: %li = %d\n", ref->len, count);
+#endif
+
   send(client_socket, ref->content, ref->len, 0);
 }
 
@@ -58,13 +66,15 @@ void handle_request(char* buffer, Entity *client) {
       close(client->socket);
       return;
     }
-    printf("Requested file:\n %s\n--------------------------\n", filename);
     if (*filename == ' ' || strncmp(filename, "index.html", 10) == 0) {
-      serve_file(client->socket, "./dist/index.html");
+      serve_file(client->socket, "index.html");
     } else if (strncmp(filename, "assets/", 7) == 0) {
       char* copy = filename;
       while(*copy != ' ')copy++;
       *copy = '\0';
+#ifdef VERBOSE
+    printf("Requested file:\n %s\n--------------------------\n", filename);
+#endif
       serve_file(client->socket, filename);
     } else {
       send_response(client->socket, 404, "Not Found");
