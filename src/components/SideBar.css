@@ -1,0 +1,39 @@
+
+.sidebar-menu {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  font-size: 14px;
+  min-width: 167px;
+  width: calc(20vmin);
+  height: 100vh;
+}
+
+.sidebar-menu > img {
+  height: 10vh;
+  width: 90%;
+  margin-left: 5%;
+  margin-top: .75vh;
+  object-fit:cover;
+  border-radius: 1rem;
+  margin-bottom: 2.5vh;
+}
+
+.sidebar-menu > ul > li {
+  font-size: .85rem;
+}
+
+.sidebar-menu > ul > li > span > span > svg {
+  fill : #ffd0d0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: .75rem;
+  margin-left: .25rem;
+}
+
+.sidebar-menu > ul > li > span {
+  padding: 1vh;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
