@@ -1,5 +1,4 @@
 
-
 CC = gcc
 JS = bun
 
@@ -9,8 +8,8 @@ client: src/*
 	$(JS) run build
 	make server
 
-server: c/*
-	$(CC) -s -O2 -o ./dist/server c/server.c c/caller.c -lpthread -lcurl
+server: server/*
+	$(CC) -s -O2 -o ./dist/server server/server.c server/caller.c -lpthread -lcurl
 
 run: server frontend
 	cd dist && ./server

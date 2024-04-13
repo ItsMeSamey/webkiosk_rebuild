@@ -29,10 +29,11 @@ globalThis.__get = (url = 'StudentFiles/PersonalFiles/StudPersonalInfo.jsp') => 
 }
 
 function ParsePersonalInfo(dom){
-  tables = dom.getElementsByTagName('tbody');
-  const kvp = Array.from(tables[0].getElementsByTagName(td))
-    .map(table_row => Array.from(table_row.getElementsByTagName('td')).map(_ => _.innerText.trim())
+  const tables = dom.getElementsByTagName('tbody');
+  const kvp = Array.from(tables[0].getElementsByTagName('tr'))
+    .map(table_row =>Array.from(table_row.getElementsByTagName('td')).map(_ => _.innerText.trim())
   );
+  console.log(kvp);
   return {
     name: kvp[0][1],
     enrollment_no: kvp[1][1],
@@ -64,3 +65,4 @@ function ParsePersonalInfo(dom){
     mentor_email:kvp[16][3]
   }
 }
+
