@@ -4,6 +4,7 @@ import { render } from 'solid-js/web';
 import DefaultBar from './components/SideBarBuilder';
 import { Nav } from './helpers/Navigator';
 import './assets/index.css';
+import './helpers/parser.js'
 
 const root = document.getElementById('root');
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {

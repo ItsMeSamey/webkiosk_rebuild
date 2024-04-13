@@ -1,20 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 #include "debug.h"
 #include "file_loader.h"
+#include "caller.h"
 
 File* file_list;
-
-typedef struct {
-  struct sockaddr_in address;
-  int socket;
-} Entity;
-
 
 // Function to send a basic HTTP response
 void send_response(int client_socket, int status_code, const char* message) {
@@ -60,12 +57,14 @@ void serve_file(int client_socket, const char* filename) {
 void handle_request(char* buffer, Entity *client) {
   if(strncmp(buffer, "GET", 3) == 0){
     // Extract requested filename from the request (assuming basic GET request)
-    char* filename = strchr(buffer, '/')+1;  // Get first word (assumed to be filename)
+    char* filename = strchr(buffer, '/');
     if (filename == NULL) {
+    CLOSE:
       send_response(client->socket, 400, "Bad Request");
       close(client->socket);
       return;
     }
+    filename++;
     if (*filename == ' ' || strncmp(filename, "index.html", 10) == 0) {
       serve_file(client->socket, "index.html");
     } else if (strncmp(filename, "assets/", 7) == 0) {
@@ -73,13 +72,93 @@ void handle_request(char* buffer, Entity *client) {
       while(*copy != ' ')copy++;
       *copy = '\0';
 #ifdef VERBOSE
-    printf("Requested file:\n %s\n--------------------------\n", filename);
+    // printf("Requested file:\n %s\n--------------------------\n", filename);
 #endif
       serve_file(client->socket, filename);
+    } else if (strncmp(filename, "api/", 4) == 0) {
+#ifdef DEBUG
+      printf("APIIIIIIIIIII");
+#endif
+      filename = strchr(filename, '/');
+      filename++;
+      char * cookie = filename;
+      filename = strchr(filename, '/');
+      if (filename ==NULL) {
+#ifdef DEBUG
+        fprintf(stderr, "apt error (cookie): %s", cookie);
+#endif
+        goto CLOSE;
+      }
+      *filename = '\0';
+      filename++;
+      char* path = filename;
+      filename = strchr(filename, ' ');
+      if (filename ==NULL) {
+#ifdef DEBUG
+        fprintf(stderr, "apt error (cookie; path): %s;%s", cookie, path);
+#endif
+        goto CLOSE;
+      }
+      *filename = '\0';
+#ifdef VERBOSE
+        fprintf(stderr, "INFO (cookie; path): %s;%s", cookie, path);
+#endif
+      void* curl =get_call_curl();
+      char url[1024];
+      snprintf(url, 1024, "https://webkiosk.thapar.edu/%s", path);
+      char* data = make_call(curl, cookie, url);
+      if (data) {
+        send_response(client->socket, 200, data);
+        free(data);
+      }
+      else send_response(client->socket, 500, "Internal error");
+      close(client->socket);
+      return;
+    } else if (strncmp(filename, "auth/", 4) == 0) {
+#ifdef DEBUG
+      printf("AUUUTTTTHHHHH");
+#endif
+      filename = strchr(filename, '/');
+      filename++;
+      char * username = filename;
+      filename = strchr(filename, '/');
+      if (filename ==NULL) {
+#ifdef DEBUG
+        fprintf(stderr, "auth error (username): %s", username);
+#endif
+        goto CLOSE;
+      }
+      *filename = '\0';
+      filename++;
+      char* password = filename;
+      filename = strchr(filename, '/');
+      if (filename ==NULL) {
+#ifdef DEBUG
+        fprintf(stderr, "auth error (username; password): %s;%s", username, password);
+#endif
+        goto CLOSE;
+      }
+      *filename = '\0';
+      filename++;
+
+      void* curl = get_auth_curl();
+      char* data = authenticate(curl, username, password, *filename);
+      if (data) {
+        send_response(client->socket, 200, data);
+        free(data);
+      }
+      else send_response(client->socket, 500, "Internal error");
+      close(client->socket);
+      return;
     } else {
-      send_response(client->socket, 404, "Not Found");
+#ifdef DEBUG
+      printf("THE UNKNOWN !!");
+#endif
+      goto CLOSE;
     }
   }
+  close(client->socket);
+  return;
 }
 
 

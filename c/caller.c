@@ -38,7 +38,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdat
 #endif
   char **data = (char **)userdata;
   // data = (char**)realloc(data, strlen(*data) + size * nmemb + 1);
-  data = (char**)malloc(size * nmemb + 1);
+  *data = (char*)malloc(size * nmemb + 1);
   strncpy(*data, (char*)ptr, size * nmemb);
   (*data)[size * nmemb] = '\0';
   return size * nmemb;
@@ -66,32 +66,32 @@ void *get_auth_curl() {
   // curl_easy_cleanup(curl);
 }
 
-char const *const authenticate(void *curl_void, char const *const roll_no, char *const password, char const user_type){
+char *authenticate(void *curl_void, char const *const roll_no, char *const password, char const user_type){
   CURL *curl = (CURL*)curl_void;
   CURLcode res;
 
-  Cookie *data = (Cookie*)malloc(sizeof(Cookie)); 
-  data->cookie = (char*)malloc(64);
-  data->status = -1;
+  Cookie data;
+  data.cookie = (char*)malloc(64);
+  data.status = -1;
 
   char post_fields[2048];
   snprintf(post_fields, sizeof(post_fields), "UserType=%c&MemberCode=%s&Password=%s", user_type, roll_no, password);
 
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, data);
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &data);
 
   res = curl_easy_perform(curl);
 
-  if (res != CURLE_OK && data->status != 302) {
-#ifdef DEBUD
+  if (res != CURLE_OK && data.status != 302) {
+#ifdef DEBUG
   if (res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed (in authenticate()): %s\n", curl_easy_strerror(res));
-  } else if (data->status != 302) {
-    fprintf(stderr, "Authentication Failed (status: %d)\n", data->status);
+  } else if (data.status != 302) {
+    fprintf(stderr, "Authentication Failed (status: %d)\n", data.status);
   }
 #endif
     return NULL;
-  } return data->cookie;
+  } return data.cookie;
 }
 
 void *get_call_curl() {
@@ -113,7 +113,7 @@ void *get_call_curl() {
   // curl_easy_cleanup(curl);
 }
 // Cookie:JSESSIONID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-char const *const make_call(void *curl_void, char const *const cookie, char const *const url) {
+char *make_call(void *curl_void, char const *const cookie, char const *const url) {
   CURL *curl = (CURL*)curl_void;
   CURLcode res;
 
@@ -123,7 +123,7 @@ char const *const make_call(void *curl_void, char const *const cookie, char cons
   char *data = NULL;
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_COOKIE, cookie_complete);
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &data);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
   res = curl_easy_perform(curl);
 
