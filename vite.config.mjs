@@ -13,14 +13,6 @@ export default defineConfig({
   ],
   server: {
     cors: true,
-    proxy: {
-      '/api': {
-        target: 'https://webkiosk.thapar.edu/', // Target URL
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
     host: '127.0.0.1',
     port: 3000,
   },

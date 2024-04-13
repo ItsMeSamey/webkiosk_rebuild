@@ -1,6 +1,5 @@
 'use strict';
 
-
 async function login(roll_number, password, is_parent){
   const response = await fetch("/auth/" +roll_number+"/"+password+"/"+(is_parent ? "P": "S"));
   console.log(response);

@@ -12,6 +12,7 @@
 #include "caller.h"
 
 File* file_list;
+#define R404
 
 // Function to send a basic HTTP response
 void send_response(int client_socket, int status_code, const char* message) {
@@ -43,14 +44,11 @@ void serve_file(int client_socket, const char* filename) {
     }
   }
 
-#ifdef DEBUG
+  D3(
   int count = 0;
-#ifdef VERBOSE
-  count = printf("%s", ref->content);
-#endif
-  printf("File length: %li = %d\n", ref->len, count);
-#endif
-
+  D4(count = d4print("%s", ref->content);)
+  d3print("File length: %li = %d\n", ref->len, count);
+  );
   send(client_socket, ref->content, ref->len, 0);
 }
 
@@ -71,22 +69,16 @@ void handle_request(char* buffer, Entity *client) {
       char* copy = filename;
       while(*copy != ' ')copy++;
       *copy = '\0';
-#ifdef VERBOSE
-    // printf("Requested file:\n %s\n--------------------------\n", filename);
-#endif
+      d2print("Requested file:\n %s\n--------------------------\n", filename);
       serve_file(client->socket, filename);
     } else if (strncmp(filename, "api/", 4) == 0) {
-#ifdef DEBUG
-      printf("APIIIIIIIIIII");
-#endif
+      d1print("at `API`");
       filename = strchr(filename, '/');
       filename++;
       char * cookie = filename;
       filename = strchr(filename, '/');
       if (filename ==NULL) {
-#ifdef DEBUG
-        fprintf(stderr, "apt error (cookie): %s", cookie);
-#endif
+        d1print(stderr, "apt error (cookie): %s", cookie);
         goto CLOSE;
       }
       *filename = '\0';
@@ -94,15 +86,11 @@ void handle_request(char* buffer, Entity *client) {
       char* path = filename;
       filename = strchr(filename, ' ');
       if (filename ==NULL) {
-#ifdef DEBUG
-        fprintf(stderr, "apt error (cookie; path): %s;%s", cookie, path);
-#endif
+        d1print(stderr, "apt error (cookie; path): %s;%s", cookie, path);
         goto CLOSE;
       }
       *filename = '\0';
-#ifdef VERBOSE
-        fprintf(stderr, "INFO (cookie; path): %s;%s", cookie, path);
-#endif
+      d1print(stderr, "INFO (cookie; path): %s;%s", cookie, path);
       void* curl =get_call_curl();
       char url[1024];
       snprintf(url, 1024, "https://webkiosk.thapar.edu/%s", path);
@@ -115,9 +103,7 @@ void handle_request(char* buffer, Entity *client) {
       close(client->socket);
       return;
     } else if (strncmp(filename, "auth/", 4) == 0) {
-#ifdef DEBUG
-      printf("AUUUTTTTHHHHH");
-#endif
+      d1print("at `AUTH`");
       filename = strchr(filename, '/');
       filename++;
       char * username = filename;

@@ -63,15 +63,9 @@ function MentorInfo({mentor_name, mentor_department, mentor_room, mentor_cell, m
 }
 
 
-
 export default function(){
-  const tables = temp1.getElementsByTagName("table");
-  let kvp = Array.from(tables[1].getElementsByTagName("tbody")[0].getElementsByTagName('tr'))
-    .map(table_row => Array.from(table_row.getElementsByTagName('td')).map(_ => _.innerText.trim())
-  );
-  let json = {}
-  x = {
-    name: kvp[0][1],
+  let json = {
+    name: 'unknown',
     enrollment_no: 'unknown',
     dob: 'unknown',
     course: 'unknown',

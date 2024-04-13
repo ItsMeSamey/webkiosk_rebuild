@@ -9,29 +9,10 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "debug.h"
+#include "client.h"
 
-#define STR(x)#x
-#define HOST "webkiosk.thapar.edu"
-// #define REQUEST "GET / HTTP/1.1\r\nHost: webkiosk.thapar.edu\r\nConnection: close\r\n\r\n"
-#define REQUEST STR(\
-POST /CommonFiles/UserAction.jsp HTTP/1.1\r\n\
-Host: webkiosk.thapar.edu\r\n\
-Content-Length: 52\r\n\
-Content-Type: application/x-www-form-urlencoded\r\n\r\n\
-UserType=S&MemberCode=102303535&&Password=1234567890\
-)
 
-#define client_unmake(x){SSL_free(x.ssl);close(x.sock);}
-#define client_send(ssl, data, len) SSL_write(ssl, data, len)
-
-typedef struct {
-  int sock;
-  SSL *ssl;
-} Client;
-
-SSL_CTX *ctx;
-struct addrinfo hints, *server_info;
-void _init(){
+void _init_client(){
   ctx = SSL_CTX_new(TLS_client_method());
   if (!ctx) {
     ERR_print_errors_fp(stderr);
@@ -87,33 +68,108 @@ int make_client(Client *c){
 
   c->sock = sockfd;
   c->ssl = ssl;
+  c->data = NULL;
   return 0;
   // SSL_free(ssl);
   // close(sockfd);
 }
 
+int auth(Client *c, const char *const roll_no, char *const password, const char user_type){
+  d4print("!!!!!!!!!!!!!!!!!!!!!!AUTH!!!!!!!!!!!!!!!!!!!!!!");
+  d0print("Sending Auth request");
+  char header[1024+1];
+  int len = snprintf(header, 1024, "POST /CommonFiles/UserAction.jsp HTTP/1.1\nHost:webkiosk.thapar.edu\nContent-Length: %lu\nContent-Type:application/x-www-form-urlencoded\n\n"
+                     "UserType=%c&MemberCode=%s&Password=%s", 31+1+strlen(roll_no)+strlen(password), user_type, roll_no, password);
+  d4print("%s", header);
+  if (SSL_write(c->ssl, header, len) < 0) {
+    perror("SSL_write");
+    client_unmake((*c));
+    return -1;
+  } d0print("Sent Auth request");
+
+  int bytes_read = SSL_read(c->ssl, header, 103);
+  if (bytes_read < 0) {
+    d2error("READ Error");
+    return -1;
+  }
+
+  d4print("%s", header);
+  D3(
+    header[bytes_read] = '\0';
+  d2print("Header: %s", header);
+);
+  if (strncmp(header+9, "302", 3) == 0){
+    char *ret = c->data;
+    strncpy(ret, header+102-32, 32);
+    d2print("Returning(cookie): %s\n", ret);
+    return 0;
+  }
+  // SSL_read(c->ssl, dumpster_fire, (1<<21));
+  d4print("::::::::::::::::::::::AUTH::::::::::::::::::::::");
+  return 1;
+}
+
+
+char *call(Client *c, char const *const cookie, char const *const url){
+  char *req = c->data;
+  d4print("!!!!!!!!!!!!!!!!!!!!!!CALL!!!!!!!!!!!!!!!!!!!!!!");
+  int len = snprintf(req, CALL_BUFFER_SIZE,
+                     "GET %s HTTP/1.1\r\n"
+                     "Host: webkiosk.thapar.edu\r\n"
+                     "User-Agent: curl/8.7.1\r\n"
+                     "Accept: */*\r\n"
+                     // "Cookie:JSESSIONID=A3256788DA782726FDE969274A39565E\r\n\r\n");
+                     "Cookie:JSESSIONID=%s\r\n\r\n", url,cookie);
+  // printf("\n:%s:\n%d\n", req, len);
+  d4print("%s", req);
+  if (SSL_write(c->ssl, req, len) < 0) {
+    perror("SSL_write");
+    client_unmake((*c));
+    return NULL;
+  } d0print("Sent Call request");
+
+  int bytes_read = SSL_read(c->ssl, req, CALL_BUFFER_SIZE-1);
+  if (bytes_read < 0) {
+    d2error("READ Error");
+    return NULL;
+  }
+
+  d4print("REQUEST: %s", req);
+  D4(
+    for (int i = 0; i < bytes_read; i++){
+      if (req[i] == '\n') printf("\\n\n");
+      else if (req[i] == '\r') printf("\\r");
+      else putc(req[i], stdout);
+    }
+    strstr(req, "\r\n\r\n");
+  );
+  d4print("::::::::::::::::::::::CALL::::::::::::::::::::::");
+  return req;
+}
 
 int main() {
-  d1print("%s\n", REQUEST);
-
-  _init();
+  _init_client();
 
   Client c;
   if (make_client(&c)) return 1;
+  char *cookie = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  call(&c, cookie, "/StudentFiles/PersonalFiles/StudPersonalInfo.jsp");
+  cookie = "A3256788DA782726FDE969274A39565E";
+  call(&c, cookie, "/StudentFiles/PersonalFiles/StudPersonalInfo.jsp");
 
-  d1print("Sending GET request");
-  if (client_send(c.ssl, REQUEST, strlen(REQUEST))) {
-    perror("SSL_write");
-    client_unmake(c);
-    return 1;
-  } d0print("Sent GET request");
+  // d1print("Sending GET request");
+  // if (SSL_write(c.ssl, REQUEST, strlen(REQUEST)) == 0) {
+  //   perror("SSL_write");
+  //   client_unmake(c);
+  //   return 1;
+  // } d0print("Sent GET request");
 
-  char buffer[1024*1024];
-  int bytes_read;
-  while ((bytes_read = SSL_read(c.ssl, buffer, sizeof(buffer) - 1)) > 0) {
-    buffer[bytes_read] = '\0';
-    printf("%s", buffer);
-  }
+  // char buffer[1024*1024];
+  // int bytes_read;
+  // while ((bytes_read = SSL_read(c.ssl, buffer, sizeof(buffer) - 1)) > 0) {
+  //   buffer[bytes_read] = '\0';
+  //   printf("D: %s", buffer);
+  // }
 
   return 0;
 }
