@@ -14,6 +14,7 @@ int main() {
     exit(1);
   }
 
+  // openssl req -x509 -newkey rsa:2048 -keyout server.key -out server.crt -days 365 -subj "/C=IN/ST=Punjab/L=Patiala/O=Thapar/CN=127.0.0.1"
   if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
     exit(1);
@@ -47,6 +48,7 @@ int main() {
   struct sockaddr_in clientaddr;
   socklen_t clientaddrlen = sizeof(clientaddr);
   clientfd = accept(sockfd, (struct sockaddr *)&clientaddr, &clientaddrlen);
+  // perror("Ok");
   if (clientfd < 0) {
     perror("accept");
     exit(1);
