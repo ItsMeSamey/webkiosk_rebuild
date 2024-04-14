@@ -1,15 +1,128 @@
-#include "debug.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "file_loader.h"
-#include "debug.h"
 #include "server_handler.h"
+#include "dynamic_array.h"
+#include "file_loader.h"
+#include "caller.h"
+#include "debug.h"
+
+
+File* file_list;
+#define R400 "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
+#define R404 "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
+#define R500 "HTTP/1.1 500 Internal error\r\nContent-Length: 0\r\n\r\n"
+#define ssend(client, string) send(client, string, strlen(string), 0)
+
+
+// Function to send a basic HTTP response
+void send_response(int client_socket, int status_code, const char* message) {
+  char response[BUFFER_SIZE];
+  snprintf(response, BUFFER_SIZE, "HTTP/1.1 %d %s\r\nContent-Length: %zu\r\n\r\n%s", status_code, message, strlen(message), message);
+  send(client_socket, response, strlen(response), 0);
+}
+
+void serve_file(int client_socket, const char* filename) {
+  File *ref;
+  if (filename == NULL) {
+    send_response(client_socket, 404, "Not Found");
+    return;
+  } else if (*filename == '\0' || strncmp(filename, "index.html", 10) == 0) {
+    ref = file_list+0;
+  } else if (strncmp(filename, "assets/", 7) == 0) {
+    while (*filename != '.' && *filename != '\0') filename++;
+    if (*filename == '\0') {
+      send_response(client_socket, 404, "Not Found");
+      return;
+    }
+    filename++;
+    if (strncmp(filename, "js", 2) == 0) ref = file_list + 1;
+    else if (strncmp(filename, "css", 3) == 0) ref = file_list + 2;
+    else if (strncmp(filename, "ico", 3) == 0) ref = file_list + 3;
+    else {
+      d1print("Unknown Request");
+      send_response(client_socket, 404, "Not Found");
+      return;
+    }
+  }
+
+  D3(
+  int count = 0;
+  D4(count = d4print("%s", ref->content);)
+  d3print("File length: %li = %d\n", ref->len, count);
+  );
+  send(client_socket, ref->content, ref->len, 0);
+}
+
+void handle_request(char* buffer, Entity *client) {
+  char* filename;
+  if(strncmp(buffer, "GET /auth/", 10) == 0){
+    d1print("at `AUTH`");
+    filename = buffer+10;
+    if (*filename == '\0') goto ERR;
+
+    char *roll_no = filename;
+    while (*filename != '/' && *filename != '\0') filename++;
+    if (*filename == '\0') goto ERR;
+    else *filename = '\0';
+    filename++;
+
+    char *password;
+    while (*filename != '/' && *filename != '\0') filename++;
+    if (*filename == '\0') goto ERR;
+    else *filename = '\0';
+    filename++;
+
+    if (auth(roll_no, password, *filename, buffer) == 302){
+      ssend(client->socket, buffer);
+    }
+  }
+  else if(strncmp(buffer, "GET /api/", 9) == 0){
+    d1print("at `API`");
+    filename = buffer+9;
+    if (*filename == '\0') goto ERR;
+
+    char *cookie = filename;
+    while (*filename != '/' && *filename != '\0') filename++;
+    if (*filename == '\0') goto ERR;
+    else *filename = '\0';
+    filename++;
+
+    char *url = filename;
+    while (*filename != ' ' && *filename != '\0') filename++;
+    if (*filename == '\0') goto ERR;
+    else *filename = '\0';
+    filename++;
+
+    char *out;
+    if(call(cookie, url, &out) == 0){
+      ssend(client->socket, buffer);
+      DARRAY_FREE(out);
+    }
+    ssend(client->socket, R500);
+    goto END;
+  }
+  if(strncmp(buffer, "GET /", 5) == 0){
+    d1print("at `/` (serving files)");
+    filename = buffer+5;
+    if (*filename == '\0') goto ERR;
+    while(*filename != ' ')filename++;
+    *filename = '\0';
+    d2print("Requested file:\n %s\n--------------------------\n", filename);
+    serve_file(client->socket, filename);
+  }
+
+ERR:
+  ssend(client->socket, R400);
+END:
+  close(client->socket);
+}
 
 
 void create_server(Entity *const server){
@@ -45,26 +158,21 @@ int main() {
   create_server(&server);
   printf("Server listening on port %d\n", SERVER_PORT);
   Entity client;
+  
 
   while (1) {
     client_address_size = sizeof(client.address);
     client.socket = accept(server.socket, (struct sockaddr*)&client.address, &client_address_size);
     if (client.socket == -1) {
-#ifdef DEBUG
-      perror("accept");
-#endif
+      d0error("accept");
       continue;
     }
     if (recv(client.socket, buffer, BUFFER_SIZE, 0) == -1) {
-#ifdef DEBUG
-      perror("recv");
-#endif
+      d0error("recv");
       close(client.socket);
       continue;
     }
-#ifdef VERBOSE
-    printf("Buffer:\n %s\n--------------------------\n", buffer);
-#endif
+    d4print("Buffer:\n %s\n--------------------------\n", buffer);
 
     handle_request(buffer, &client);
     close(client.socket);

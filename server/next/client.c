@@ -12,9 +12,11 @@
 #include "client.h"
 
 
+SSL_CTX *ctx_client;
+struct addrinfo hints, *server_info;
 void _init_client(){
-  ctx = SSL_CTX_new(TLS_client_method());
-  if (!ctx) {
+  ctx_client = SSL_CTX_new(TLS_client_method());
+  if (!ctx_client) {
     ERR_print_errors_fp(stderr);
     perror("\nCannot initiaize ssl context ;");
     exit(1);
@@ -31,13 +33,13 @@ void _init_client(){
   if (ret != 0) {
     d0print("getaddrinfo: %s", gai_strerror(ret));
     perror("Cannot get adress of " HOST);
-    SSL_CTX_free(ctx);
+    SSL_CTX_free(ctx_client);
     exit(1);
   }
 
   return;
   // freeaddrinfo(server_info);
-  // SSL_CTX_free(ctx);
+  // SSL_ctx_client_free(ctx);
 }
 
 int make_client(Client *c){
@@ -46,7 +48,7 @@ int make_client(Client *c){
     perror("socket");
     return 1;
   } d0print("Socket created successfully");
-  SSL *ssl = SSL_new(ctx);
+  SSL *ssl = SSL_new(ctx_client);
   if (!ssl) {
     ERR_print_errors_fp(stderr);
     close(sockfd);
@@ -104,13 +106,13 @@ int auth(Client *c, const char *const roll_no, char *const password, const char 
     d2print("Returning(cookie): %s\n", ret);
     return 0;
   }
-  // SSL_read(c->ssl, dumpster_fire, (1<<21));
+  // seems like ubread data is implicitly ignored
   d4print("::::::::::::::::::::::AUTH::::::::::::::::::::::");
   return 1;
 }
 
 
-char *call(Client *c, char const *const cookie, char const *const url){
+int call(Client *c, char const *const cookie, char const *const url){
   char *req = c->data;
   d4print("!!!!!!!!!!!!!!!!!!!!!!CALL!!!!!!!!!!!!!!!!!!!!!!");
   int len = snprintf(req, CALL_BUFFER_SIZE,
@@ -125,13 +127,13 @@ char *call(Client *c, char const *const cookie, char const *const url){
   if (SSL_write(c->ssl, req, len) < 0) {
     perror("SSL_write");
     client_unmake((*c));
-    return NULL;
+    return -1;
   } d0print("Sent Call request");
 
   int bytes_read = SSL_read(c->ssl, req, CALL_BUFFER_SIZE-1);
   if (bytes_read < 0) {
     d2error("READ Error");
-    return NULL;
+    return -1;
   }
 
   d4print("REQUEST: %s", req);
@@ -144,7 +146,7 @@ char *call(Client *c, char const *const cookie, char const *const url){
     strstr(req, "\r\n\r\n");
   );
   d4print("::::::::::::::::::::::CALL::::::::::::::::::::::");
-  return req;
+  return 0;
 }
 
 int main() {
@@ -154,23 +156,9 @@ int main() {
   if (make_client(&c)) return 1;
   char *cookie = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   call(&c, cookie, "/StudentFiles/PersonalFiles/StudPersonalInfo.jsp");
+  // cookie = auth(&c, "102303535", "", 'S');
   cookie = "A3256788DA782726FDE969274A39565E";
   call(&c, cookie, "/StudentFiles/PersonalFiles/StudPersonalInfo.jsp");
-
-  // d1print("Sending GET request");
-  // if (SSL_write(c.ssl, REQUEST, strlen(REQUEST)) == 0) {
-  //   perror("SSL_write");
-  //   client_unmake(c);
-  //   return 1;
-  // } d0print("Sent GET request");
-
-  // char buffer[1024*1024];
-  // int bytes_read;
-  // while ((bytes_read = SSL_read(c.ssl, buffer, sizeof(buffer) - 1)) > 0) {
-  //   buffer[bytes_read] = '\0';
-  //   printf("D: %s", buffer);
-  // }
-
   return 0;
 }
 

@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include "caller.h"
+#include "dynamic_array.h"
 
 typedef struct {
   char *cookie;
@@ -11,45 +12,45 @@ typedef struct {
 } Cookie;
 
 static size_t header_callback(char *buffer, size_t size, size_t nmemb, void *userdata) {
-#ifdef VERBOSE
-  printf("!!!!!!!!!!!!Headers!!!!!!!!!!!!!! \n%*s:::::::::::::Headers:::::::::::::\n\n", (int)(size * nmemb), buffer);
-#endif
+  d4print("!!!!!!!!!!!!Headers!!!!!!!!!!!!!! \n%*s:::::::::::::Headers:::::::::::::\n\n", (int)(size * nmemb), buffer);
   Cookie* data = (Cookie*)userdata;
   // Header: `Set-Cookie: JSESSIONID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX; Path=/; Secure; HttpOnly`
   if (strncmp(buffer, "Set-Cookie:", 11) == 0) {
-    sscanf(buffer, "%*[^=]%*1c%63[^;]", data->cookie);
+    sscanf(buffer+11, "%*[^=]%*1c%33[^;]", data->cookie);
     if (data->status != -1) { return 0; } // Skip further processing
-  } else if (data->status == -1 && strncmp(buffer, "HTTP/1.1", 8) == 0) {
-    sscanf(buffer, "%*[^ ]%*[ ]%d", &data->status);
+  } else if (data->status == -1 && strncmp(buffer, "HTTP/1.1 ", 9) == 0) {
+    sscanf(buffer+9, "%d", &data->status);
   }
   return size * nmemb;
 }
 
 static size_t null_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-#ifdef VERBOSE
-  printf("!!!!!!!!!!!!Null!!!!!!!!!!!!!! \n%*s\n:::::::::::::Null:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
-#endif
+  d4print("!!!!!!!!!!!!Null!!!!!!!!!!!!!! \n%*s\n:::::::::::::Null:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
   return size * nmemb;
 }
 
 static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-#ifdef VERBOSE
-  printf("!!!!!!!!!!!!Body!!!!!!!!!!!!!! \n%*s\n:::::::::::::Body:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
-#endif
+  d4print("!!!!!!!!!!!!Body!!!!!!!!!!!!!! \n%*s\n:::::::::::::Body:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
   char **data = (char **)userdata;
-  // data = (char**)realloc(data, strlen(*data) + size * nmemb + 1);
-  *data = (char*)malloc(size * nmemb + 1);
-  strncpy(*data, (char*)ptr, size * nmemb);
-  (*data)[size * nmemb] = '\0';
+  size_t cap = (size*nmemb);
+  if (*data == NULL){
+    DARRAY_MAKE(char, *data);
+    DARRAY_RESIZE(char, (*data), cap)
+    strncpy(*data, (char*)ptr, size * nmemb);
+    (*data)[size * nmemb] = '\0';
+  } else {
+    int pre = strlen(*data);
+    DARRAY_RESIZE(char, *data, pre+cap+1)
+    strncpy((*data) + pre, (char*)ptr, size * nmemb);
+    (*data)[pre + size*nmemb] = '\0';
+  }
   return size * nmemb;
 }
 
-void *get_auth_curl() {
+CURL *get_auth_curl() {
   CURL *curl = curl_easy_init();
   if (!curl) {
-#ifdef DEBUD
-    fprintf(stderr, "curl_easy_init() failed \n");
-#endif
+    d0print("curl_easy_init() failed \n");
     return NULL;
   }
   curl_easy_setopt(curl, CURLOPT_URL, "https://webkiosk.thapar.edu/CommonFiles/UserAction.jsp");
@@ -66,15 +67,15 @@ void *get_auth_curl() {
   // curl_easy_cleanup(curl);
 }
 
-char *authenticate(void *curl_void, char const *const roll_no, char *const password, char const user_type){
-  CURL *curl = (CURL*)curl_void;
+int auth(char const *const roll_no, char *const password, char const user_type, char* to){
+  CURL *curl = get_auth_curl();
   CURLcode res;
 
   Cookie data;
-  data.cookie = (char*)malloc(64);
+  data.cookie = to;
   data.status = -1;
 
-  char post_fields[2048];
+  char post_fields[1024];
   snprintf(post_fields, sizeof(post_fields), "UserType=%c&MemberCode=%s&Password=%s", user_type, roll_no, password);
 
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
@@ -82,24 +83,22 @@ char *authenticate(void *curl_void, char const *const roll_no, char *const passw
 
   res = curl_easy_perform(curl);
 
-  if (res != CURLE_OK && data.status != 302) {
-#ifdef DEBUG
-  if (res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed (in authenticate()): %s\n", curl_easy_strerror(res));
-  } else if (data.status != 302) {
-    fprintf(stderr, "Authentication Failed (status: %d)\n", data.status);
-  }
-#endif
-    return NULL;
-  } return data.cookie;
+  D0(
+    if (res != CURLE_OK && data.status != 302) {
+      if (res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed (in authenticate()): %s\n", curl_easy_strerror(res));
+      } else if (data.status != 302) {
+        fprintf(stderr, "Authentication Failed (status: %d)\n", data.status);
+      }
+    }
+  )
+  return data.status;
 }
 
-void *get_call_curl() {
+CURL *get_call_curl() {
   CURL *curl = curl_easy_init();
   if (!curl) {
-#ifdef DEBUD
-    fprintf(stderr, "curl_easy_init() failed \n");
-#endif
+    d0print("curl_easy_init() failed \n");
     return NULL;
   }
   // DANGER !!
@@ -112,27 +111,31 @@ void *get_call_curl() {
   return curl;
   // curl_easy_cleanup(curl);
 }
+
 // Cookie:JSESSIONID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-char *make_call(void *curl_void, char const *const cookie, char const *const url) {
-  CURL *curl = (CURL*)curl_void;
+int call(char const *const cookie, char const *const _url, __DARRAY(char **out)) {
+  CURL *curl = get_call_curl();
   CURLcode res;
 
   char cookie_complete[64];
-  snprintf(cookie_complete, sizeof(cookie_complete), "JSESSIONID=%s", cookie);
+  struct curl_slist *chunk = NULL;
+  snprintf(cookie_complete, sizeof(cookie_complete), "Cookie:JSESSIONID=%s", cookie);
+  chunk = curl_slist_append(chunk, cookie_complete);
 
+  char url[256];
+  snprintf(url, 256, "https://webkiosk.thapar.edu/%s", _url);
   char *data = NULL;
   curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_setopt(curl, CURLOPT_COOKIE, cookie_complete);
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
   res = curl_easy_perform(curl);
 
   if (res != CURLE_OK) {
-#ifdef DEBUD
-    fprintf(stderr, "curl_easy_perform() failed (in make_call()): %s\n", curl_easy_strerror(res));
-#endif
-    return NULL;
+    d0print("curl_easy_perform() failed (in make_call()): %s\n", curl_easy_strerror(res));
+    return -1;
   }
-  return data;
+  *out = data;
+  return 0;
 }
 

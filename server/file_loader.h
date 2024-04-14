@@ -5,7 +5,6 @@
 #include <fcntl.h> // open
 #include <unistd.h> // close
 #include <string.h>
-#include "dynamic_array.h"
 
 typedef struct {
   char * content;
