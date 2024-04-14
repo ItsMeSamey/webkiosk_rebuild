@@ -14,31 +14,24 @@
 #include "debug.h"
 
 
-File* file_list;
 #define R400 "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"
 #define R404 "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
 #define R500 "HTTP/1.1 500 Internal error\r\nContent-Length: 0\r\n\r\n"
 #define ssend(client, string) send(client, string, strlen(string), 0)
 
-
-// Function to send a basic HTTP response
-void send_response(int client_socket, int status_code, const char* message) {
-  char response[BUFFER_SIZE];
-  snprintf(response, BUFFER_SIZE, "HTTP/1.1 %d %s\r\nContent-Length: %zu\r\n\r\n%s", status_code, message, strlen(message), message);
-  send(client_socket, response, strlen(response), 0);
-}
+File* file_list;
 
 void serve_file(int client_socket, const char* filename) {
   File *ref;
   if (filename == NULL) {
-    send_response(client_socket, 404, "Not Found");
+    ssend(client_socket, R404);
     return;
   } else if (*filename == '\0' || strncmp(filename, "index.html", 10) == 0) {
     ref = file_list+0;
   } else if (strncmp(filename, "assets/", 7) == 0) {
     while (*filename != '.' && *filename != '\0') filename++;
     if (*filename == '\0') {
-      send_response(client_socket, 404, "Not Found");
+      ssend(client_socket, R404);
       return;
     }
     filename++;
@@ -47,7 +40,7 @@ void serve_file(int client_socket, const char* filename) {
     else if (strncmp(filename, "ico", 3) == 0) ref = file_list + 3;
     else {
       d1print("Unknown Request");
-      send_response(client_socket, 404, "Not Found");
+      ssend(client_socket, R404);
       return;
     }
   }
@@ -60,6 +53,7 @@ void serve_file(int client_socket, const char* filename) {
   send(client_socket, ref->content, ref->len, 0);
 }
 
+#define NLF(delim) while (*filename != '/' && *filename != '\0') filename++;if (*filename == '\0') goto ERR;else *filename = '\0';filename++;
 void handle_request(char* buffer, Entity *client) {
   char* filename;
   if(strncmp(buffer, "GET /auth/", 10) == 0){
@@ -67,17 +61,8 @@ void handle_request(char* buffer, Entity *client) {
     filename = buffer+10;
     if (*filename == '\0') goto ERR;
 
-    char *roll_no = filename;
-    while (*filename != '/' && *filename != '\0') filename++;
-    if (*filename == '\0') goto ERR;
-    else *filename = '\0';
-    filename++;
-
-    char *password;
-    while (*filename != '/' && *filename != '\0') filename++;
-    if (*filename == '\0') goto ERR;
-    else *filename = '\0';
-    filename++;
+    char *roll_no = filename;NLF('/');
+    char *password;NLF('/');
 
     if (auth(roll_no, password, *filename, buffer) == 302){
       ssend(client->socket, buffer);
@@ -88,20 +73,11 @@ void handle_request(char* buffer, Entity *client) {
     filename = buffer+9;
     if (*filename == '\0') goto ERR;
 
-    char *cookie = filename;
-    while (*filename != '/' && *filename != '\0') filename++;
-    if (*filename == '\0') goto ERR;
-    else *filename = '\0';
-    filename++;
+    char *cookie = filename;NLF('/');
+    char *url = filename;NLF(' ');
 
-    char *url = filename;
-    while (*filename != ' ' && *filename != '\0') filename++;
-    if (*filename == '\0') goto ERR;
-    else *filename = '\0';
-    filename++;
-
-    char *out;
-    if(call(cookie, url, &out) == 0){
+    char *out = NULL;
+    if(call(cookie, url, &out) == 0 && out != NULL){
       ssend(client->socket, buffer);
       DARRAY_FREE(out);
     }
@@ -123,7 +99,6 @@ ERR:
 END:
   close(client->socket);
 }
-
 
 void create_server(Entity *const server){
   server->socket = socket(AF_INET, SOCK_STREAM, 0);
