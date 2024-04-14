@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 #include <string.h>
+#include <unistd.h>
 #include "caller.h"
 #include "dynamic_array.h"
 
@@ -12,39 +13,42 @@ typedef struct {
 } Cookie;
 
 static size_t header_callback(char *buffer, size_t size, size_t nmemb, void *userdata) {
-  d4print("!!!!!!!!!!!!Headers!!!!!!!!!!!!!! \n%*s:::::::::::::Headers:::::::::::::\n\n", (int)(size * nmemb), buffer);
+  d4print("!!!!!!!!!!!!Headers!!!!!!!!!!!!!! :%d:\n%*s:::::::::::::Headers:::::::::::::\n\n", (int)(size * nmemb), (int)(size * nmemb), buffer);
   Cookie* data = (Cookie*)userdata;
   // Header: `Set-Cookie: JSESSIONID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX; Path=/; Secure; HttpOnly`
   if (strncmp(buffer, "Set-Cookie:", 11) == 0) {
-    sscanf(buffer+11, "%*[^=]%*1c%33[^;]", data->cookie);
+    snprintf(data->cookie, 128, "HTTP/1.1 200\r\nContent-Length: 32\r\n\r\n");
+    sscanf(buffer+11, "%*[^=]%*1c%33[^;]", data->cookie+36);
     if (data->status != -1) { return 0; } // Skip further processing
   } else if (data->status == -1 && strncmp(buffer, "HTTP/1.1 ", 9) == 0) {
-    sscanf(buffer+9, "%d", &data->status);
+    sscanf(buffer+8, "%d", &data->status);
   }
   return size * nmemb;
 }
 
 static size_t null_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-  d4print("!!!!!!!!!!!!Null!!!!!!!!!!!!!! \n%*s\n:::::::::::::Null:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
+  d4print("!!!!!!!!!!!!Null!!!!!!!!!!!!!! :%d:\n%*s\n:::::::::::::Null:::::::::::::\n\n", (int)(size * nmemb), (int)(size * nmemb), (char*)ptr);
   return size * nmemb;
 }
 
 static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-  d4print("!!!!!!!!!!!!Body!!!!!!!!!!!!!! \n%*s\n:::::::::::::Body:::::::::::::\n\n", (int)(size * nmemb), (char*)ptr);
+  d4print("!!!!!!!!!!!!Body!!!!!!!!!!!!!! :%d:\n%*s\n:::::::::::::Body:::::::::::::\n\n", (int)(size * nmemb), (int)(size * nmemb), (char*)ptr);
   char **data = (char **)userdata;
-  size_t cap = (size*nmemb);
+  const size_t cap = (size*nmemb);
   if (*data == NULL){
     DARRAY_MAKE(char, *data);
-    DARRAY_RESIZE(char, (*data), cap)
-    strncpy(*data, (char*)ptr, size * nmemb);
-    (*data)[size * nmemb] = '\0';
+    DARRAY_RESIZE(char, *data, cap+41);
+    *DARRAY_SIZE(*data) = 0;
+    memcpy(*data, "HTTP/1.1 200\r\nContent-Length:        \r\n\r\n", 41*sizeof(char));
+    memcpy((*data)+41, (char*)ptr, cap*sizeof(char));
   } else {
-    int pre = strlen(*data);
-    DARRAY_RESIZE(char, *data, pre+cap+1)
-    strncpy((*data) + pre, (char*)ptr, size * nmemb);
-    (*data)[pre + size*nmemb] = '\0';
+    int pre = DARRAY_SIZE(*data)[1];
+    DARRAY_RESIZE(char, *data, pre+cap)
+    memcpy((*data) + pre, (char*)ptr, cap*sizeof(char));
   }
-  return size * nmemb;
+  *DARRAY_SIZE(*data) += cap;
+  d1print("SIZE: %lu; From: %lu", DARRAY_SIZE(*data)[1], cap);
+  return cap;
 }
 
 CURL *get_auth_curl() {
@@ -77,21 +81,15 @@ int auth(char const *const roll_no, char *const password, char const user_type, 
 
   char post_fields[1024];
   snprintf(post_fields, sizeof(post_fields), "UserType=%c&MemberCode=%s&Password=%s", user_type, roll_no, password);
+  d2print("Sending: %s", post_fields);
 
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
   curl_easy_setopt(curl, CURLOPT_HEADERDATA, &data);
 
   res = curl_easy_perform(curl);
 
-  D0(
-    if (res != CURLE_OK && data.status != 302) {
-      if (res != CURLE_OK) {
-        fprintf(stderr, "curl_easy_perform() failed (in authenticate()): %s\n", curl_easy_strerror(res));
-      } else if (data.status != 302) {
-        fprintf(stderr, "Authentication Failed (status: %d)\n", data.status);
-      }
-    }
-  )
+  D0(if (res != CURLE_OK && data.status != 302) {if (res != CURLE_OK) {dprint("curl_easy_perform() failed (in authenticate()): %s\n", curl_easy_strerror(res));} else if (data.status != 302) {dprint("Authentication Failed (status: %d)\n", data.status);}})
+  dprint("Status: %d", data.status);
   return data.status;
 }
 
@@ -135,6 +133,12 @@ int call(char const *const cookie, char const *const _url, __DARRAY(char **out))
     d0print("curl_easy_perform() failed (in make_call()): %s\n", curl_easy_strerror(res));
     return -1;
   }
+  sprintf(data+29 ,"%8d", (int)*DARRAY_SIZE(data));
+  *(data+29+8) = '\r';
+  // d4print(">>>\n%s\n\n\n<<<", data);
+  // char *c = strstr(data, "\r\n\r\n");
+  dprint("strlen(%lu) vs len(%lu) vs cap(%lu)\n", strlen(data), DARRAY_SIZE(data)[0], DARRAY_SIZE(data)[1]);
+  // for (int i = 0; i < cap; i++) printf("%c", data[i]);
   *out = data;
   return 0;
 }

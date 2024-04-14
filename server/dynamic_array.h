@@ -12,24 +12,23 @@ extern "C" {
   size_t*__inerenal_variable_1 = (size_t *)malloc(2*sizeof(size_t) + 3*sizeof(type));\
   __inerenal_variable_1[0] = 0;\
   __inerenal_variable_1[1] = 3;\
-  array = (type *)(__inerenal_variable_1+2);\
+  (array) = (type *)(__inerenal_variable_1+2);\
 }
 
-#define DARRAY_SIZE(array) (((size_t *)array)-2)
+#define DARRAY_SIZE(array) ((size_t *)(array)-2)
 
 #define DARRAY_ADD(type, array, value) {\
   size_t* __inerenal_variable_1 = DARRAY_SIZE(array);\
   if (__inerenal_variable_1[0] == __inerenal_variable_1[1]) {\
     __inerenal_variable_1[1] = (__inerenal_variable_1[1]<<1) | 1;\
-    array = (type *)((size_t *)realloc((void *)__inerenal_variable_1, __inerenal_variable_1[1]*sizeof(type) + 2*sizeof(size_t)) + 2);\
+    (array) = (type *)((size_t *)realloc((void *)__inerenal_variable_1, __inerenal_variable_1[1]*sizeof(type) + 2*sizeof(size_t)) + 2);\
   }\
-  array[__inerenal_variable_1[0]++] = value;\
+  (array)[__inerenal_variable_1[0]++] = (value);\
 }
 
 #define DARRAY_RESIZE(type, array, capacity) {\
-  size_t* __inerenal_variable_1 = DARRAY_SIZE(array);\
-  __inerenal_variable_1[0] = __inerenal_variable_1[0] > capacity ? capacity : __inerenal_variable_1[0];\
-  __inerenal_variable_1[1] = capacity;\
+  DARRAY_SIZE(array)[1] = capacity;\
+  (array) = (type *)((size_t *)realloc((void *)DARRAY_SIZE(array), (capacity)*sizeof(type) + 2*sizeof(size_t)) + 2);\
 }
 
 #define DARRAY_FREE(array) free((void *)DARRAY_SIZE(array))

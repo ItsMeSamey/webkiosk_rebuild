@@ -21,6 +21,7 @@
 File* file_list;
 
 void serve_file(int client_socket, const char* filename) {
+  d2print("Serving: %s\n", filename);
   File *ref;
   if (filename == NULL) {
     ssend(client_socket, R404);
@@ -44,15 +45,12 @@ void serve_file(int client_socket, const char* filename) {
     }
   }
 
-  D3(
-  int count = 0;
-  D4(count = d4print("%s", ref->content);)
-  d3print("File length: %li = %d\n", ref->len, count);
-  );
+  D3(int count = 0;D4(count = d4print("%s", ref->content);)d3print("File length: %li = %d\n", ref->len, count););
+
   send(client_socket, ref->content, ref->len, 0);
 }
 
-#define NLF(delim) while (*filename != '/' && *filename != '\0') filename++;if (*filename == '\0') goto ERR;else *filename = '\0';filename++;
+#define NLF(delim) while (*filename != delim && *filename != '\0') filename++;if (*filename == '\0') goto ERR;else *filename = '\0';filename++;
 void handle_request(char* buffer, Entity *client) {
   char* filename;
   if(strncmp(buffer, "GET /auth/", 10) == 0){
@@ -61,36 +59,32 @@ void handle_request(char* buffer, Entity *client) {
     if (*filename == '\0') goto ERR;
 
     char *roll_no = filename;NLF('/');
-    char *password;NLF('/');
-
+    char *password = filename;NLF('/');
     if (auth(roll_no, password, *filename, buffer) == 302){
       ssend(client->socket, buffer);
     }
-  }
-  else if(strncmp(buffer, "GET /api/", 9) == 0){
+  } else if(strncmp(buffer, "GET /api/", 9) == 0){
     d1print("at `API`");
     filename = buffer+9;
     if (*filename == '\0') goto ERR;
 
     char *cookie = filename;NLF('/');
     char *url = filename;NLF(' ');
-
     char *out = NULL;
     if(call(cookie, url, &out) == 0 && out != NULL){
-      ssend(client->socket, buffer);
+      d4print("Response : %*s", (int)len, out);
+      send(client->socket, out, DARRAY_SIZE(out)[1], 0);
       DARRAY_FREE(out);
+      goto END;
     }
     ssend(client->socket, R500);
     goto END;
-  }
-  if(strncmp(buffer, "GET /", 5) == 0){
+  } else if(strncmp(buffer, "GET /", 5) == 0){
     d1print("at `/` (serving files)");
-    filename = buffer+5;
-    if (*filename == '\0') goto ERR;
-    while(*filename != ' ')filename++;
-    *filename = '\0';
-    d2print("Requested file:\n %s\n--------------------------\n", filename);
-    serve_file(client->socket, filename);
+
+    filename = buffer+5;NLF(' ');
+    d2print("Requested file:\n %s\n--------------------------\n", buffer+5);
+    serve_file(client->socket, buffer+5);
   }
 
 ERR:
@@ -102,7 +96,7 @@ END:
 void create_server(Entity *const server){
   server->socket = socket(AF_INET, SOCK_STREAM, 0);
   if (server->socket == -1) {
-    perror("socket");
+    derror("socket");
     exit(1);
   }
 
@@ -112,12 +106,12 @@ void create_server(Entity *const server){
   server->address.sin_port = htons(SERVER_PORT);
 
   if (bind(server->socket, (struct sockaddr*)&server->address, sizeof(server->address)) == -1) {
-    perror("bind");
+    derror("bind");
     close(server->socket);
     exit(1);
   }
   if (listen(server->socket, 5) == -1) {
-    perror("listen");
+    derror("listen");
     close(server->socket);
     exit(1);
   }
@@ -130,7 +124,7 @@ int main() {
 
   Entity server;
   create_server(&server);
-  printf("Server listening on port %d\n", SERVER_PORT);
+  dprint("Server listening on port %d\n", SERVER_PORT);
   Entity client;
   
 
