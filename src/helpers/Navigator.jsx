@@ -29,7 +29,6 @@ function navigate(_){
   else if (_ === 'home') anim(all[1]);
   else if (_ === 'personal-info') anim(all[2]);
   else if (_ === 'archive') anim(all[3]);
-  else if (_ === 'log-out') anim(all[2]);
 }
 
 

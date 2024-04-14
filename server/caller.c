@@ -131,6 +131,7 @@ int call(char const *const cookie, char const *const _url, __DARRAY(char **out))
 
   if (res != CURLE_OK) {
     d0print("curl_easy_perform() failed (in make_call()): %s\n", curl_easy_strerror(res));
+    curl_easy_cleanup(curl);
     return -1;
   }
   sprintf(data+29 ,"%8d", (int)*DARRAY_SIZE(data));
