@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "server_handler.h"
 #include "dynamic_array.h"
 #include "file_loader.h"
 #include "caller.h"
