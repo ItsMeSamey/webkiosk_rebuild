@@ -1,24 +1,5 @@
 'use strict';
-
-async function login(roll_number, password, is_parent){
-  const response = await fetch("/auth/" +roll_number+"/"+password+"/"+(is_parent ? "P": "S"));
-  console.log(response);
-  if (response.ok) {
-    const decoder = new TextDecoder();
-    return decoder.decode((await (await (response.body.getReader())).read()).value);
-  }
-}
-
-async function call(cookie, path){
-  const response = await fetch("/api/" + cookie + "/" + path);
-  // console.log(response);
-  if (response.ok) {
-    const decoder = new TextDecoder();
-    const parser = new DOMParser();
-    const dom = decoder.decode((await (await (response.body.getReader())).read()).value);
-    return parser.parseFromString(dom, "text/html");
-  }
-}
+import {} from './caller';
 
 async function parsePersonalInfo(cookie){
   try{
@@ -126,11 +107,6 @@ async function parseCGPA(cookie){
     return;
   }
 }
-
-
-globalThis._login = login;
-globalThis._call = call;
-globalThis._info = parsePersonalInfo;
 
 
 
