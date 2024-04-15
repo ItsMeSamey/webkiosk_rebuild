@@ -1,6 +1,9 @@
 'use strict';
-
 import { createSignal } from "solid-js";
+
+import { login } from '../helpers/caller'
+import { sidebar, navigate} from '../helpers/state'
+import { parsePersonalInfo } from '../helpers/parser'
 import './Login.css';
 
 
@@ -13,8 +16,17 @@ export default function(){
   const password = <input autocomplete="webkiosk-password" type="password" placeholder="Password" id="password" />;
   function handleclick(e){
     e.preventDefault();
-    console.log(e);
-    console.log(username.value, password.value);
+    login(username.value, password.value, false)
+      .then(cookie=>{
+        globalThis.__cookie = cookie;
+        parsePersonalInfo(cookie).then(info=>{
+          console.log('lgn',info);
+          globalThis.__info = {};
+          globalThis.__info.PersonalInfo = info;
+          sidebar(true);
+          navigate('personal-info');
+        })
+      });
   }
   return (
     <>

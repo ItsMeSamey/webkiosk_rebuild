@@ -95,7 +95,10 @@ export default function(){
     mentor_cell: 'unknown',
     mentor_email:'unknown'
   }
-  const arr = [PersonalInfo(json), StudentInfo(json), ParentInfo(json), CurrentAddressInfo(json), PermanantAddressInfo(json), MentorInfo(json)]
+
+  json = globalThis.__info.PersonalInfo;
+  console.log(globalThis.__info.PersonalInfo);
+  const arr = [PersonalInfo, StudentInfo, ParentInfo, CurrentAddressInfo, PermanantAddressInfo, MentorInfo]
       //   style={{
       //   'grid-template-columns': 'repeat(auto-fit, minmax(200px, 1fr))',
       //   'grid-auto-rows': 'minmax(100px, auto)',
@@ -105,7 +108,7 @@ export default function(){
     <div
       class="ml-4 mt-4 grid gap-4 lg:grid-cols-3 max-lg:grid-cols-2 max-[540px]:grid-cols-1">
       <For each={arr}>
-        {_=>_}
+        {_=>_(globalThis.__info.PersonalInfo)}
       </For>
     </div>
   );

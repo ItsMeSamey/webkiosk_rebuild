@@ -1,5 +1,5 @@
 'use strict';
-import {} from './caller';
+import { login, call } from './caller';
 
 async function parsePersonalInfo(cookie){
   try{
@@ -7,7 +7,6 @@ async function parsePersonalInfo(cookie){
     const kvp = Array.from(dom.getElementsByTagName('tbody')[0].getElementsByTagName('tr'))
       .map(table_row =>Array.from(table_row.getElementsByTagName('td')).map(_ => _.innerText.trim())
     );
-    console.log(kvp);
     return {
       name: kvp[0][1],
       enrollment_no: kvp[1][1],
@@ -108,5 +107,14 @@ async function parseCGPA(cookie){
   }
 }
 
+
+globalThis.__login = login;
+globalThis.__call = call;
+globalThis.__parsePersonalInfo = parsePersonalInfo;
+globalThis.__parseExamMarks = parseExamMarks;
+globalThis.__parseGrades = parseGrades;
+globalThis.__parseCGPA = parseCGPA
+
+export {parsePersonalInfo, parseExamMarks, parseGrades, parseCGPA }
 
 
