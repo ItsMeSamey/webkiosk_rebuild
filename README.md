@@ -15,8 +15,3 @@ to start development server (for frontend)
 
 for backend see `Makefile`
 to enable printing debug info, uncomment `server/debug.h:5` 
-
-files in
-# `server/next`
-are for future use
-
