@@ -1,3 +1,16 @@
+## Requirement
+
+#### `linux` (or wsl on windows) or `macos` (not tested).
+
+`node` / `bun`, 
+
+`libcurl` (probably present),
+
+`gcc` / `clang`, 
+
+gnu `make` (or run the commands yourself)
+
+
 ## Usage
 
 install deendencies with
