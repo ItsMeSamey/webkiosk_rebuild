@@ -12,32 +12,26 @@ typedef struct {
 } File;
 
 char const* const get_content_type(char const * const filename){
-  const char *ext = strrchr(filename, '.');
-  if (ext == NULL) {
-    return "text/plain";
-  }
-  if (strcmp(ext, ".html") == 0 || strcmp(ext, ".htm") == 0) {
+  const char *ext = strchr(filename, '.');
+  if (ext==NULL || *(ext+1) == '\0') goto T;
+  else ext++;
+  if (*ext == 'h' ) {
+    if (*(ext+4) =='.') return "text/html\r\nContent-Encoding: gzip";
     return "text/html";
   }
-  if (strcmp(ext, ".css") == 0) {
+  if (*ext == 'c') {
+    if (*(ext+3) =='.') return "text/css\r\nContent-Encoding:gzip";
     return "text/css";
   }
-  if (strcmp(ext, ".js") == 0) {
+  if (*ext == 'j') {
+    if (*(ext+2) =='.') return "application/javascript\r\nContent-Encoding:gzip";
     return "application/javascript";
   }
-  if (strcmp(ext, ".ico") == 0) {
+  if (*ext == 'i') {
+    if (*(ext+3) =='.') return "image/x-icon\r\nContent-Encoding:gzip";
     return "image/x-icon";
   }
-  if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".jpeg") == 0) {
-    return "image/jpeg";
-  }
-  if (strcmp(ext, ".png") == 0) {
-    return "image/png";
-  }
-  if (strcmp(ext, ".gif") == 0) {
-    return "image/gif";
-  }
-  return "text/plain";
+T:return "text/plain";
 }
 
 File get_file(char const * const filename) {
@@ -66,31 +60,20 @@ File get_file(char const * const filename) {
   return f;
 };
 
+
+#define lsopen(format, index) list = popen("ls " format, "r");fscanf(list, "%128[^ ^\n]", filename_buff);fclose(list);file[index] = get_file(filename_buff);
 File* get_file_list(){
   static File file[4];
-  char filename_buff[1024+1];
+  char filename_buff[128+1];
   FILE *list;
 
-  file[0] = get_file("index.html");
-
-  list = popen("ls assets/*.js", "r");
-  fscanf(list, "%[^ ^\n]", filename_buff);
-  fclose(list);
-  file[1] = get_file(filename_buff);
-
-
-  list = popen("ls assets/*.css", "r");
-  fscanf(list, "%[^ ^\n]", filename_buff);
-  fclose(list);
-  file[2] = get_file(filename_buff);
-
-
-  list = popen("ls assets/*.ico", "r");
-  fscanf(list, "%[^ ^\n]", filename_buff);
-  fclose(list);
-  file[3] = get_file(filename_buff);
-
+  lsopen("index.html*", 0)
+  lsopen("assets/*.js*", 1)
+  lsopen("assets/*.css*", 2)
+  lsopen("assets/*.ico*", 3)
+  
   return file;
 }
+#undef lsopen
 
 

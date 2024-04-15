@@ -5,7 +5,7 @@ JS = bun
 all: server
 
 client: src/*
-	$(JS) run build
+	$(JS) run build --minify terser
 	make server
 
 server: server/*
