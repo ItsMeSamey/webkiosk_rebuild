@@ -64,6 +64,7 @@ function MentorInfo({mentor_name, mentor_department, mentor_room, mentor_cell, m
 
 
 export default function(){
+  console.log('NOOOOOOOOOOOO');
   let json = {
     name: 'unknown',
     enrollment_no: 'unknown',

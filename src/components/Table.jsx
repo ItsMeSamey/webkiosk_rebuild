@@ -25,6 +25,5 @@ function Table(heading, pairs){
   );
 };
 
-
 export default Table;
 
