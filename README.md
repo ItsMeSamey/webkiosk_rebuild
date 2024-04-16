@@ -1,3 +1,16 @@
+## Requirement
+
+#### `linux` (or wsl on windows) or `macos` (not tested).
+
+`node` / `bun`, 
+
+`libcurl` (probably present),
+
+`gcc` / `clang`, 
+
+gnu `make` (or run the commands yourself)
+
+
 ## Usage
 
 install deendencies with
@@ -9,14 +22,7 @@ use `make` to install. run with `./server` from within `dist` dolder
 
 ## Development
 
-In the project directory, you can run:
-### `bun run dev`
+You can run: `bun run dev` 
 to start development server (for frontend)
 
-for backend see `Makefile`
-to enable printing debug info, uncomment `server/debug.h:5` 
-
-files in
-# `server/next`
-are for future use
-
+for backend see `Makefile`. To enable printing debug info, uncomment `server/debug.h:5` 
