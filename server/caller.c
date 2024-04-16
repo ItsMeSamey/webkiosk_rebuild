@@ -4,7 +4,6 @@
 #include <curl/curl.h>
 #include <string.h>
 #include <unistd.h>
-#include "caller.h"
 #include "dynamic_array.h"
 
 typedef struct {
@@ -51,7 +50,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdat
   return cap;
 }
 
-CURL *get_auth_curl() {
+CURL *make_auth_curl() {
   CURL *curl = curl_easy_init();
   if (!curl) {
     d0print("curl_easy_init() failed \n");
@@ -70,6 +69,34 @@ CURL *get_auth_curl() {
   return curl;
   // curl_easy_cleanup(curl);
 }
+CURL *make_call_curl() {
+  CURL *curl = curl_easy_init();
+  if (!curl) {
+    d0print("curl_easy_init() failed \n");
+    return NULL;
+  }
+  // DANGER !!
+  curl_easy_setopt(curl, CURLOPT_STDERR, NULL);
+  // !! DANGER
+
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, null_callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  // curl_easy_setopt(curl, CURLOPT_CACHE, 1);
+  return curl;
+  // curl_easy_cleanup(curl);
+}
+
+CURL *get_auth_curl(){
+  static CURL *curl = NULL;
+  if (curl ==NULL) curl = make_auth_curl();
+  return curl;
+}
+CURL *get_call_curl(){
+  static CURL *curl = NULL;
+  if (curl ==NULL) curl = make_call_curl();
+  return curl;
+}
+
 
 int auth(char const *const roll_no, char *const password, char const user_type, char* to){
   CURL *curl = get_auth_curl();
@@ -93,22 +120,6 @@ int auth(char const *const roll_no, char *const password, char const user_type, 
   return data.status;
 }
 
-CURL *get_call_curl() {
-  CURL *curl = curl_easy_init();
-  if (!curl) {
-    d0print("curl_easy_init() failed \n");
-    return NULL;
-  }
-  // DANGER !!
-  curl_easy_setopt(curl, CURLOPT_STDERR, NULL);
-  // !! DANGER
-
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, null_callback);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-  // curl_easy_setopt(curl, CURLOPT_CACHE, 1);
-  return curl;
-  // curl_easy_cleanup(curl);
-}
 
 // Cookie:JSESSIONID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 int call(char const *const cookie, char const *const _url, __DARRAY(char **out)) {

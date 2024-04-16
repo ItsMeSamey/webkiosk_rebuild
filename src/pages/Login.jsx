@@ -8,9 +8,6 @@ import './Login.css';
 
 
 export default function(){
-  // <link rel="preconnect" href="https://fonts.gstatic.com">
-  // <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  // <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
   const [bg, setBg] = createSignal("red");
   const username = <input type="text" autocomplete="enrollment-number" placeholder="Enrollment No." id="username" />;
   const password = <input autocomplete="webkiosk-password" type="password" placeholder="Password" id="password" />;
@@ -25,16 +22,14 @@ export default function(){
           globalThis.__info.PersonalInfo = info;
           sidebar(true);
           navigate('personal-info');
-        })
+        });
       });
   }
   return (
-    <>
-      <div class="background">
-        <div class="shape"></div>
-        <div class="shape"></div>
-      </div>
-      <form id="login-form" class="select-none h-auto w-auto backdrop-blur-3xl rounded-2xl shadow-black shadow-2xl px-16 py-20 border-none" >
+    <div id="login-form" class="flex justify-center select-none place-items-center h-full w-full overflow-scroll">
+      <div class="shape mb-32 mr-16" style='background:linear-gradient(to right,#ff512f,#f09819);'/>
+      <div class="shape mt-32 ml-16" style='background:linear-gradient(#1845ad,#23a2f6);'/>
+      <form class="z-50 overflow-clip rounded-3xl shadow-black shadow-2xl border-none">
         <h3>Login Here</h3>
         <label for="username">Username</label>
         {username}
@@ -42,7 +37,7 @@ export default function(){
         {password}
         <button class="bg-white px-4 py-2" onclick={handleclick}>Log In</button>
       </form>
-    </>
+    </div>
   );
 }
 

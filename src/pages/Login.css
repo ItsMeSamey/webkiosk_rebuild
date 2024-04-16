@@ -2,38 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-.background{
-  width: 430px;
-  height: 520px;
+#login-form > div {
+  @apply size-60;
+  @apply max-[300px]:size-56;
+  @apply max-[288px]:size-52;
+  @apply max-[274px]:size-48;
+  @apply max-[257px]:size-40;
+  @apply max-[224px]:size-32;
+  @apply max-[197px]:size-0;
   position: absolute;
-  transform: translate(-50%,-50%);
-  left: 50%;
-  top: 50%;
+  display: block;
+  border-radius: 100%;
+  backdrop-filter: blur(100px) saturate(125%);
+  animation: fadeIn 6s ease-out;
+  animation-delay: 1s;
+  animation-fill-mode: both;
 }
-.background .shape{
-  height: 200px;
-  width: 200px;
-  position: absolute;
-  border-radius: 50%;
-}
-.shape:first-child{
-  background: linear-gradient( #1845ad, #23a2f6 );
-  left: -80px;
-  top: -80px;
-}
-.shape:last-child{
-  background: linear-gradient( to right, #ff512f, #f09819 );
-  right: -30px;
-  bottom: -80px;
+@keyframes fadeIn {
+  0% { opacity: 0; };
+  10% {opacity: .25; };
+  100% { opacity: .75; };
 }
 
-#login-form > label {
+#login-form > form {
+  @apply px-16 py-20;
+  @apply max-[360px]:px-10;
+  @apply max-[300px]:px-8;
+  @apply max-[277px]:px-6 max-[360px]:py-16;
+  @apply max-[227px]:px-4 max-[360px]:py-14;
+  @apply max-[197px]:px-1;
+  backdrop-filter: blur(100px) saturate(125%);
+}
+#login-form > form > label {
   display: block;
   @apply mt-6;
   @apply mb-2;
   @apply ml-3;
 }
-#login-form > input{
+#login-form > form > input{
   @apply px-4;
   @apply py-2;
   @apply w-full;
@@ -42,59 +48,11 @@
   @apply rounded-full;
   @apply mb-4;
 }
-#login-form > button{
+#login-form > form > button{
   @apply mt-6;
   @apply w-full;
   @apply rounded-full;
   @apply text-black;
   cursor: pointer;
 }
-
-
-/* .mouse-cursor-gradient-tracking { */
-/*   position: relative; */
-/*   background: #7983ff; */
-/*   padding: 0.5rem 1rem; */
-/*   font-size: 1.2rem; */
-/*   border: none; */
-/*   color: white; */
-/*   cursor: pointer; */
-/*   outline: none; */
-/*   overflow: hidden; */
-/* } */
-/**/
-/* .mouse-cursor-gradient-tracking span { */
-/*   position: relative; */
-/* } */
-/**/
-/* .mouse-cursor-gradient-tracking::before { */
-/*   --size: 0; */
-/*   content: ''; */
-/*   position: absolute; */
-/*   left: var(--x); */
-/*   top: var(--y); */
-/*   width: var(--size); */
-/*   height: var(--size); */
-/*   background: radial-gradient(circle closest-side, pink, transparent); */
-/*   transform: translate(-50%, -50%); */
-/*   transition: width 0.2s ease, height 0.2s ease; */
-/* } */
-/**/
-/* .mouse-cursor-gradient-tracking:hover::before { */
-/*   --size: 200px; */
-/* } */
-/**/
-/* <button class="mouse-cursor-gradient-tracking"> */
-/*   <span>Hover me</span> */
-/* </button> */
-/**/
-/* let btn = document.querySelector('.mouse-cursor-gradient-tracking'); */
-/* btn.addEventListener('mousemove', e => { */
-/*   let rect = e.target.getBoundingClientRect(); */
-/*   let x = e.clientX - rect.left; */
-/*   let y = e.clientY - rect.top; */
-/*   btn.style.setProperty('--x', x + 'px'); */
-/*   btn.style.setProperty('--y', y + 'px'); */
-/* }); */
-
 

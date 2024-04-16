@@ -3,13 +3,16 @@
 @tailwind utilities;
 
 html {
-  background: #1f1010;
+  background: #2f1818;
   height: 100%;
   color: #fff;
+  --mouse-xp: 50%;
+  --mouse-yp: 50%;
+  background: radial-gradient(circle at var(--mouse-xp) var(--mouse-yp), #2f1818, #100)
 }
 
 body {
-	height: 100%;
+  height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;

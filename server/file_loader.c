@@ -63,14 +63,14 @@ File get_file(char const * const filename) {
 
 #define lsopen(format, index) list = popen("ls " format, "r");fscanf(list, "%128[^ ^\n]", filename_buff);fclose(list);file[index] = get_file(filename_buff);
 File* get_file_list(){
-  static File file[4];
+  static File file[2];
   char filename_buff[128+1];
   FILE *list;
 
   lsopen("index.html*", 0)
-  lsopen("assets/*.js*", 1)
-  lsopen("assets/*.css*", 2)
-  lsopen("assets/*.ico*", 3)
+  // lsopen("assets/*.js*", 1)
+  // lsopen("assets/*.css*", 2)
+  lsopen("*.ico*", 1)
   
   return file;
 }

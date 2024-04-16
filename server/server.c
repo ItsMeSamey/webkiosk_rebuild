@@ -8,8 +8,8 @@
 #include <arpa/inet.h>
 
 #include "dynamic_array.h"
-#include "file_loader.h"
-#include "caller.h"
+#include "file_loader.c"
+#include "caller.c"
 #include "debug.h"
 
 
@@ -28,16 +28,14 @@ void serve_file(int client_socket, const char* filename) {
     return;
   } else if (*filename == '\0' || strncmp(filename, "index.html", 10) == 0) {
     ref = file_list+0;
-  } else if (strncmp(filename, "assets/", 7) == 0) {
+  } else {
     while (*filename != '.' && *filename != '\0') filename++;
     if (*filename == '\0') {
       ssend(client_socket, R404);
       return;
     }
     filename++;
-    if (strncmp(filename, "js", 2) == 0) ref = file_list + 1;
-    else if (strncmp(filename, "css", 3) == 0) ref = file_list + 2;
-    else if (strncmp(filename, "ico", 3) == 0) ref = file_list + 3;
+    if (strncmp(filename, "ico", 2) == 0) ref = file_list + 1;
     else {
       d1print("Unknown Request");
       ssend(client_socket, R404);
@@ -115,38 +113,5 @@ void create_server(Entity *const server){
     close(server->socket);
     exit(1);
   }
-}
-
-int main() {
-  file_list = get_file_list();
-  socklen_t client_address_size;
-  char buffer[BUFFER_SIZE];
-
-  Entity server;
-  create_server(&server);
-  dprint("Server listening on port %d\n", SERVER_PORT);
-  Entity client;
-  
-
-  while (1) {
-    client_address_size = sizeof(client.address);
-    client.socket = accept(server.socket, (struct sockaddr*)&client.address, &client_address_size);
-    if (client.socket == -1) {
-      d0error("accept");
-      continue;
-    }
-    if (recv(client.socket, buffer, BUFFER_SIZE, 0) == -1) {
-      d0error("recv");
-      close(client.socket);
-      continue;
-    }
-    d4print("Buffer:\n %s\n--------------------------\n", buffer);
-
-    handle_request(buffer, &client);
-    close(client.socket);
-  }
-
-  close(server.socket);
-  return 0;
 }
 
