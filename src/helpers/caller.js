@@ -2,11 +2,11 @@
 
 async function login(roll_number, password, is_parent){
   const response = await fetch("/auth/" +roll_number+"/"+password+"/"+(is_parent ? "P": "S"));
-  window.localStorage.setItem('auth', JSON.stringify({e:roll_number,p:password,t:is_parent}));
+  setTimeout(()=>window.localStorage.setItem('auth', JSON.stringify({e:roll_number,p:password,t:is_parent})), 0);
   if (response.ok) {
     const decoder = new TextDecoder();
     const cookie = decoder.decode((await (await (response.body.getReader())).read()).value);
-    window.localStorage.setItem('cookie', JSON.stringify({t:Date.now(),v:cookie}));
+    setTimeout(()=>window.localStorage.setItem('cookie', JSON.stringify({t:Date.now(),v:cookie})), 0);
     globalThis.__.cookie = cookie;
     return cookie;
   }
@@ -27,8 +27,8 @@ async function getcookie(){
   if (Date.now - cookie.t <10240000){
     return cookie.v;
   } else {
-    const logindata = window.localStorage.getItem('auth', );
-    return login();
+    const credentials = JSON.parse(window.localStorage.getItem('auth'));
+    return login(credentials.e, credentials.p, credentials.t);
   }
 }
 

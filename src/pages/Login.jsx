@@ -15,7 +15,7 @@ export default function(){
   function handleclick(e){
     try{// console.log('tryinn');
       sidebar(false);
-      // // console.log('done');
+      // console.log('done');
     }catch(error){console.log(error);}
     setBg(false);
     e.preventDefault();
@@ -24,8 +24,7 @@ export default function(){
         globalThis.__cookie = cookie;
         parsePersonalInfo(cookie).then(info=>{
           // console.log('lgn',info);
-          globalThis.__info = {};
-          globalThis.__info.PersonalInfo = info;
+          globalThis.__.PersonalInfo = info;
           sidebar(true);
           navigate('personal-info');
         });

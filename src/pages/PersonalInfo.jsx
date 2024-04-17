@@ -58,7 +58,7 @@ function MentorInfo({mentor_name, mentor_department, mentor_room, mentor_cell, m
     _('Name', mentor_name),
     _('Department', mentor_department),
     _('Room', mentor_room),
-    _('Cell No./Email', mentor_cell + mentor_email),
+    _('Cell No./Email', mentor_cell + '/' + mentor_email),
   ]);
 }
 
@@ -95,18 +95,17 @@ export default function(){
     mentor_email:'unknown'
   }
 
-  json = globalThis.__info.PersonalInfo;
   const arr = [PersonalInfo, StudentInfo, ParentInfo, CurrentAddressInfo, PermanantAddressInfo, MentorInfo]
-      //   style={{
-      //   'grid-template-columns': 'repeat(auto-fit, minmax(200px, 1fr))',
-      //   'grid-auto-rows': 'minmax(100px, auto)',
-      // }}
+  //   style={{
+  //   'grid-template-columns': 'repeat(auto-fit, minmax(200px, 1fr))',
+  //   'grid-auto-rows': 'minmax(100px, auto)',
+  // }}
 
   return(
     <div
       class="ml-4 mt-4 grid gap-4 lg:grid-cols-3 max-lg:grid-cols-2 max-[540px]:grid-cols-1">
       <For each={arr}>
-        {_=>_(globalThis.__info.PersonalInfo)}
+        {_=>_(globalThis.__.PersonalInfo?globalThis.__info.PersonalInfo:json)}
       </For>
     </div>
   );
