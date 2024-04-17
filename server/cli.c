@@ -26,7 +26,7 @@ int main() {
   // system("stty cooked");
   // return 0;
 
-  file_list = get_file_list();
+  get_file_list();
   socklen_t client_address_size;
   char buffer[BUFFER_SIZE];
 

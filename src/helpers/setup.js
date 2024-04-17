@@ -2,7 +2,6 @@
 
 export default function(){
   const gradient = document.getElementsByTagName('html')[0].style;
-  console.log(gradient);
   let x = 100/window.outerWidth;
   let y = 100/window.outerHeight;
 

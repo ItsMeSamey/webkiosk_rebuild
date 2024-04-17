@@ -7,6 +7,8 @@ import { SideBarComponent } from './SideBar';
 
 
 export default () => {
+  // IMPORTANT; otherwise causes recomputation each time DefaultBar is loaded;
+  if (globalThis.__.DefaultBar) return globalThis.__.DefaultBar;
   // temprary convenience function 
   const _ = (n,p) => ({name:n, path:p});
 
@@ -24,7 +26,8 @@ export default () => {
     SideBarComponent('Finance', credit_card, [_('Fees', 'fees'), _('SRS', 'srs')]),
     SideBarComponent('Archive', archive, 'archive'),
   ];
-
-  return SideBar(sb_array);
+  
+  globalThis.__.DefaultBar = SideBar(sb_array);
+  return globalThis.__.DefaultBar;
 };
 

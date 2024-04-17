@@ -18,9 +18,8 @@
 #define R500 "HTTP/1.1 500 Internal error\r\nContent-Length: 0\r\n\r\n"
 #define ssend(client, string) send(client, string, strlen(string), 0)
 
-File* file_list;
-
 void serve_file(int client_socket, const char* filename) {
+  D(get_file_list());
   d2print("Serving: %s\n", filename);
   File *ref;
   if (filename == NULL) {

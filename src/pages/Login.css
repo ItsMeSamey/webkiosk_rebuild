@@ -4,16 +4,8 @@
 
 #login-form > div {
   @apply size-60;
-  @apply max-[300px]:size-56;
-  @apply max-[288px]:size-52;
-  @apply max-[274px]:size-48;
-  @apply max-[257px]:size-40;
-  @apply max-[224px]:size-32;
-  @apply max-[197px]:size-0;
-  position: absolute;
-  display: block;
-  border-radius: 100%;
-  backdrop-filter: blur(100px) saturate(125%);
+  @apply absolute;
+  @apply rounded-full;
   animation: fadeIn 6s ease-out;
   animation-delay: 1s;
   animation-fill-mode: both;
@@ -24,15 +16,16 @@
   100% { opacity: .75; };
 }
 
-#login-form > form {
+#login-form > form{
   @apply px-16 py-20;
   @apply max-[360px]:px-10;
   @apply max-[300px]:px-8;
   @apply max-[277px]:px-6 max-[360px]:py-16;
   @apply max-[227px]:px-4 max-[360px]:py-14;
   @apply max-[197px]:px-1;
-  backdrop-filter: blur(100px) saturate(125%);
+  backdrop-filter: blur(100px);
 }
+
 #login-form > form > label {
   display: block;
   @apply mt-6;
@@ -47,12 +40,5 @@
   background-color: rgba(255,255,255,0.07);
   @apply rounded-full;
   @apply mb-4;
-}
-#login-form > form > button{
-  @apply mt-6;
-  @apply w-full;
-  @apply rounded-full;
-  @apply text-black;
-  cursor: pointer;
 }
 

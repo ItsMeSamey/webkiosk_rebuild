@@ -8,6 +8,7 @@
 }
 
 .sidebar-menu > img {
+  @apply min-h-[90px];
   height: 10vh;
   width: 90%;
   margin-left: 5%;

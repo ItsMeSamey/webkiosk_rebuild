@@ -5,27 +5,30 @@ import {Motion, Presence} from 'solid-motionone'
 
 import {nav, bar, sidebar, navigate} from './helpers/state';
 import setup from './helpers/setup.js';
+import './assets/index.css';
+import './helpers/parser.js'
+
 import DefaultBar from './components/SideBarBuilder';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import PersonalInfo from "./pages/PersonalInfo";
-import './assets/index.css';
-import './helpers/parser.js'
 
 const root = document.getElementById('root');
+globalThis.__ = {};
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error('Root element not found !!');
 }
 
 render(()=>{
   setup();
-  const Anim = (x) => <Motion class="w-full h-full" transition={{duration: .5, easing: "ease-in-out"}} animate={{opacity: [0, 1]}} exit={{opacity:[1,.25], scale: [1,.65], transition: {duration: 0.2}}}>{x.children}</Motion>;
-  navigate('home');
+  navigate('');
+  sidebar(false);
   // <div class='max-[715px]:hidden sidebar-menu max-[715px]:w-0 transition-all duration-500' />
+  const Anim = (x) => <Motion class={"h-full"+(bar()?" min-[715px]:ml-56":"")} transition={{duration: .5, easing: "ease-in-out"}} animate={{opacity: [0, 1]}} exit={{opacity:[1,.25], scale: [1,.65], transition: {duration: 0.2}}}>{x.children}</Motion>;
   return (
     <>
       <Presence>
-        <Show when={nav()!==''&&bar()}>
+        <Show when={bar()}>
           <Motion.div
             class={"fixed top-0 left-0 bg-black/75 z-[40] min-[715px]:hidden w-full h-full"}
             style={{"backdrop-filter":"blur(8px)"}}
@@ -36,17 +39,17 @@ render(()=>{
           />
         </Show>
       </Presence>
-      <div class='h-full w-full left-0 top-0'>
+      <div class='h-full w-full'>
         <Presence>
-          <Show when={nav()!==''&&bar()}>
-            <Motion.div
-              class={"fixed transform-gpu z-50 bg-[#180403] p-1 sidebar-menu left-0 top-0 min-h-full h-full min-w-32"} 
+          <Show when={bar()}>
+            <Motion.aside
+              class={"touch:hidden select-none overflow-scroll fixed transform-gpu z-50 bg-[#180403] p-1 sidebar-menu left-0 top-0 min-h-full h-full min-w-32"} 
               transition={{duration: .75, easing: "ease-in-out"}} 
               animate={{x: ['-22rem', 0]}}
               exit={{ x: [0, '-22rem'], transition: {duration: .2}}}
             >
               <DefaultBar/>
-            </Motion.div>
+            </Motion.aside>
           </Show>
         </Presence>
         <Presence exitBeforeEnter>

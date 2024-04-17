@@ -11,6 +11,8 @@ typedef struct {
   ssize_t len;
 } File;
 
+File* file_list = NULL;
+
 char const* const get_content_type(char const * const filename){
   const char *ext = strchr(filename, '.');
   if (ext==NULL || *(ext+1) == '\0') goto T;
@@ -49,8 +51,7 @@ File get_file(char const * const filename) {
     return f;
   }
   char buffer[1024+1];
-  int occupied = snprintf(buffer, 1024, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %zu\r\n\r\n",
-                              get_content_type(filename), file_stat.st_size);
+  int occupied = snprintf(buffer, 1024, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %zu\r\n\r\n", get_content_type(filename), file_stat.st_size);
   char *all = (char *)malloc(sizeof(char)*(occupied + file_stat.st_size + 1));
   strncpy(all, buffer, occupied);
   read(fd, all+occupied, file_stat.st_size);
@@ -60,19 +61,16 @@ File get_file(char const * const filename) {
   return f;
 };
 
-
 #define lsopen(format, index) list = popen("ls " format, "r");fscanf(list, "%128[^ ^\n]", filename_buff);fclose(list);file[index] = get_file(filename_buff);
-File* get_file_list(){
+void get_file_list(){
   static File file[2];
   char filename_buff[128+1];
   FILE *list;
 
-  lsopen("index.html*", 0)
-  // lsopen("assets/*.js*", 1)
-  // lsopen("assets/*.css*", 2)
-  lsopen("*.ico*", 1)
-  
-  return file;
+  lsopen("*.html", 0)
+  lsopen("*.ico", 1)
+  File *temp = file_list;
+  file_list = file;
 }
 #undef lsopen
 
