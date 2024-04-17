@@ -46,7 +46,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdat
     memcpy((*data) + pre, (char*)ptr, cap*sizeof(char));
   }
   *DARRAY_SIZE(*data) += cap;
-  d1print("SIZE: %lu; From: %lu", DARRAY_SIZE(*data)[1], cap);
+  d1print("SIZE: %d; From: %lu", DARRAY_SIZE(*data)[1], cap);
   return cap;
 }
 
@@ -149,7 +149,7 @@ int call(char const *const cookie, char const *const _url, __DARRAY(char **out))
   *(data+29+8) = '\r';
   // d4print(">>>\n%s\n\n\n<<<", data);
   // char *c = strstr(data, "\r\n\r\n");
-  dprint("strlen(%lu) vs len(%lu) vs cap(%lu)\n", strlen(data), DARRAY_SIZE(data)[0], DARRAY_SIZE(data)[1]);
+  d1print("strlen(%lu) vs len(%d) vs cap(%d)\n", strlen(data), DARRAY_SIZE(data)[0], DARRAY_SIZE(data)[1]);
   // for (int i = 0; i < cap; i++) printf("%c", data[i]);
   *out = data;
   return 0;

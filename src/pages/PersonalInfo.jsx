@@ -64,7 +64,6 @@ function MentorInfo({mentor_name, mentor_department, mentor_room, mentor_cell, m
 
 
 export default function(){
-  console.log('NOOOOOOOOOOOO');
   let json = {
     name: 'unknown',
     enrollment_no: 'unknown',
@@ -97,7 +96,6 @@ export default function(){
   }
 
   json = globalThis.__info.PersonalInfo;
-  console.log(globalThis.__info.PersonalInfo);
   const arr = [PersonalInfo, StudentInfo, ParentInfo, CurrentAddressInfo, PermanantAddressInfo, MentorInfo]
       //   style={{
       //   'grid-template-columns': 'repeat(auto-fit, minmax(200px, 1fr))',

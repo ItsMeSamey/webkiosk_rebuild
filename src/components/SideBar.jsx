@@ -1,5 +1,5 @@
 'use strict';
-import { For, createSignal } from "solid-js";
+import { For, createSignal, untrack } from "solid-js";
 import { navigate } from '../helpers/state'
 import logo from '../assets/logo.png';
 import './SideBar.css'
@@ -32,7 +32,7 @@ function SideBarMaker(component) {
   const [visible, setVisible] = createSignal(false);
   return (
     <li class={"group"}>
-      <span onclick={()=>setVisible(!visible())} class={cls + (visible() ? " bg-red-950":"") }>
+      <span onclick={()=>{setVisible(!visible())}} class={cls + (visible() ? " bg-red-950":"") }>
         <span class="flex flex-row">{component.icon}{component.name}</span>
         <svg class={"will-change-auto duration-300 ml-auto size-5" + (visible() ? " fill-red-300 rotate-90":" fill-white")} width="24" height="24" viewBox="0 0 24 24"><path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"/></svg>
       </span>

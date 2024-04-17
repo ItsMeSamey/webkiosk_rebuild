@@ -1,12 +1,12 @@
 'use strict';
 import { render } from 'solid-js/web';
 import { Match, Show, Switch } from "solid-js";
-import {Motion, Presence} from 'solid-motionone'
+import {Motion, Presence} from 'solid-motionone';
 
 import {nav, bar, sidebar, navigate} from './helpers/state';
 import setup from './helpers/setup.js';
 import './assets/index.css';
-import './helpers/parser.js'
+import './helpers/parser.js';
 
 import DefaultBar from './components/SideBarBuilder';
 import Login from './pages/Login';
@@ -14,17 +14,17 @@ import Home from './pages/Home';
 import PersonalInfo from "./pages/PersonalInfo";
 
 const root = document.getElementById('root');
-globalThis.__ = {};
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error('Root element not found !!');
 }
 
 render(()=>{
   setup();
-  navigate('');
-  sidebar(false);
+  navigate('home');
+  sidebar(true);
+  const bar_memo = DefaultBar();
   // <div class='max-[715px]:hidden sidebar-menu max-[715px]:w-0 transition-all duration-500' />
-  const Anim = (x) => <Motion class={"h-full"+(bar()?" min-[715px]:ml-56":"")} transition={{duration: .5, easing: "ease-in-out"}} animate={{opacity: [0, 1]}} exit={{opacity:[1,.25], scale: [1,.65], transition: {duration: 0.2}}}>{x.children}</Motion>;
+  const Anim = x => <Motion class={"h-full"+(bar()?" min-[715px]:ml-56":"")} transition={{duration: .5, easing: "ease-in-out"}} animate={{opacity: [0, 1]}} exit={{opacity:[1,.25], scale: [1,.65], transition: {duration: 0.2}}}>{x.children}</Motion>;
   return (
     <>
       <Presence>
@@ -43,12 +43,12 @@ render(()=>{
         <Presence>
           <Show when={bar()}>
             <Motion.aside
-              class={"touch:hidden select-none overflow-scroll fixed transform-gpu z-50 bg-[#180403] p-1 sidebar-menu left-0 top-0 min-h-full h-full min-w-32"} 
+              class={"touch:hidden select-none overflow-scroll fixed z-50 bg-[#180403] p-1 sidebar-menu left-0 top-0 min-h-full h-full min-w-32"} 
               transition={{duration: .75, easing: "ease-in-out"}} 
               animate={{x: ['-22rem', 0]}}
               exit={{ x: [0, '-22rem'], transition: {duration: .2}}}
             >
-              <DefaultBar/>
+              {bar_memo}
             </Motion.aside>
           </Show>
         </Presence>

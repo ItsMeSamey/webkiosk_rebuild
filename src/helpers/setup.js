@@ -1,6 +1,10 @@
 'use default';
 
+
+
 export default function(){
+  globalThis.__ = {};
+  globalThis.__.GLOBAL = [];
   const gradient = document.getElementsByTagName('html')[0].style;
   let x = 100/window.outerWidth;
   let y = 100/window.outerHeight;

@@ -9,7 +9,7 @@ client: src/*
 	make server
 
 server: server/*
-	$(CC) -s -O2 -o ./dist/server server/server.c server/caller.c -lpthread -lcurl
+	$(CC) -s -O2 -o ./dist/server server/cli.c -lpthread -lcurl
 
 run: server frontend
 	cd dist && ./server

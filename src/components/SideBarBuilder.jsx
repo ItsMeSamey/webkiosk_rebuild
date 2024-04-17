@@ -3,16 +3,12 @@
 import SideBar from './SideBar';
 import { SideBarComponent } from './SideBar';
 
-// cant call SideBar(sb_array) directly because it is requires root element to be mounted
-
 
 export default () => {
-  // IMPORTANT; otherwise causes recomputation each time DefaultBar is loaded;
-  if (globalThis.__.DefaultBar) return globalThis.__.DefaultBar;
   // temprary convenience function 
   const _ = (n,p) => ({name:n, path:p});
 
-  // Default components list
+  // Default component icons
   const file = <svg width="24" height="24" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12zM13 4l5 5h-5V4zM7 8h3v2H7V8zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/></svg>;
   const book = <svg width="24" height="24" viewBox="0 0 24 24"><path d="M2 7v1l11 4 9-4V7L11 4z"/><path d="M4 11v4.267c0 1.621 4.001 3.893 9 3.734 4-.126 6.586-1.972 7-3.467.024-.089.037-.178.037-.268V11L13 14l-5-1.667v3.213l-1-.364V12l-3-1z"/></svg>;
   const credit_card = <svg width="24" height="24" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v2h20V6c0-1.103-.897-2-2-2zM2 18c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2v-6H2v6zm3-3h6v2H5v-2z"/></svg>;
@@ -27,7 +23,6 @@ export default () => {
     SideBarComponent('Archive', archive, 'archive'),
   ];
   
-  globalThis.__.DefaultBar = SideBar(sb_array);
-  return globalThis.__.DefaultBar;
+  return SideBar(sb_array);
 };
 

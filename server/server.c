@@ -69,7 +69,7 @@ void handle_request(char* buffer, Entity *client) {
     char *url = filename;NLF(' ');
     char *out = NULL;
     if(call(cookie, url, &out) == 0 && out != NULL){
-      d4print("Response : %*s", (int)len, out);
+      d4print("Response : %*s", *DARRAY_SIZE(out), out);
       send(client->socket, out, DARRAY_SIZE(out)[1], 0);
       DARRAY_FREE(out);
       goto END;

@@ -7,7 +7,7 @@ import solidPlugin from 'vite-plugin-solid';
 export default defineConfig({
   plugins: [
     solidPlugin(),
-    viteSingleFile(),//{ removeViteModuleLoader: true }
+    viteSingleFile({ removeViteModuleLoader: true }),
     compression({exclude: [/\.(br)$/, /\.(gz)$/], deleteOriginalAssets: true }),
     /* 
     Uncomment the following line to enable solid-devtools.

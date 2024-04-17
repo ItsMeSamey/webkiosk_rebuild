@@ -67,7 +67,7 @@ void get_file_list(){
   char filename_buff[128+1];
   FILE *list;
 
-  lsopen("*.html", 0)
+  lsopen("*.html*", 0)
   lsopen("*.ico", 1)
   File *temp = file_list;
   file_list = file;

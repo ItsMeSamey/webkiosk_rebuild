@@ -13,9 +13,9 @@ export default function(){
   const username = <input type="text" autocomplete="enrollment-number" placeholder="Enrollment No." id="username" />;
   const password = <input autocomplete="webkiosk-password" type="password" placeholder="Password" id="password" />;
   function handleclick(e){
-    try{console.log('tryinn');
+    try{// console.log('tryinn');
       sidebar(false);
-      console.log('done');
+      // // console.log('done');
     }catch(error){console.log(error);}
     setBg(false);
     e.preventDefault();
@@ -23,7 +23,7 @@ export default function(){
       .then(cookie=>{
         globalThis.__cookie = cookie;
         parsePersonalInfo(cookie).then(info=>{
-          console.log('lgn',info);
+          // console.log('lgn',info);
           globalThis.__info = {};
           globalThis.__info.PersonalInfo = info;
           sidebar(true);
