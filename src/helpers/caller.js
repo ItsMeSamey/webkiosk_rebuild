@@ -1,7 +1,7 @@
 'use strict';
 
 async function login(roll_number, password, is_parent){
-  const response = await fetch("/auth/" +roll_number+"/"+password+"/"+(is_parent ? "P": "S"));
+  const response = await fetch('/auth/' +roll_number+'/'+password+'/'+(is_parent ? 'P': 'S'));
   setTimeout(()=>window.localStorage.setItem('auth', JSON.stringify({e:roll_number,p:password,t:is_parent})), 0);
   if (response.ok) {
     const decoder = new TextDecoder();
@@ -13,11 +13,11 @@ async function login(roll_number, password, is_parent){
 }
 
 async function call(cookie, path){
-  const response = await fetch("/api/" + cookie + "/" + path);
+  const response = await fetch('/api/' + cookie + '/' + path);
   if (response.ok) {
     const decoder = new TextDecoder();
     const parser = new DOMParser();
-    const dom = parser.parseFromString(decoder.decode((await (await (response.body.getReader())).read()).value), "text/html");
+    const dom = parser.parseFromString(decoder.decode((await (await (response.body.getReader())).read()).value), 'text/html');
     return dom;
   }
 }

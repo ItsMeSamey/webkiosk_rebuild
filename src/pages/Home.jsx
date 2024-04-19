@@ -8,10 +8,10 @@ const T = () => Table('Hello Stranger', [{key: 'aaaaaaaaaaaaaaaaa', value: 'baaa
 export default function() {
   return (
     <div>
-      <div class={"flex justify-center flex-auto"}>
+      <div class={'flex justify-center flex-auto'}>
         <T/>
       </div>
-      <img src={logo} alt="logo" />
+      <img src={logo} alt='logo' />
     </div>
   );
 };

@@ -152,7 +152,7 @@ function movePointer( x, y ) {
 }
 
 export default function () {
-  const canvas = <canvas class="h-full w-full fixed"></canvas>;
+  const canvas = <canvas class='h-full w-full fixed'></canvas>;
   const context = canvas.getContext('2d');
 
   canvas.onmousemove = event => {
@@ -168,7 +168,7 @@ export default function () {
 
   return (
     <div
-      class="h-full w-full fixed bg-[#000]"
+      class='h-full w-full fixed bg-[#000]'
       style={{'background-image': 'radial-gradient(circle at top right, rgba(151, 68, 124, 0.13), transparent),radial-gradient(circle at 20% 80%, rgba(155, 96, 55, 0.13), transparent)'}}
     >
       {canvas}
