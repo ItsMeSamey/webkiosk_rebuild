@@ -21,8 +21,8 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(()=>{
   setup();
-  navigate('');
-  sidebar(true);
+  navigate('personal-info');
+  sidebar(false);
   // <div class='max-[715px]:hidden sidebar-menu max-[715px]:w-0 transition-all duration-500' />
   const Anim = x => (
     <Motion
@@ -41,7 +41,7 @@ render(()=>{
       <Suspense>
         <Presence exitBeforeEnter>
           <Switch>
-            <Match when={nav() === ''}>
+            <Match when={nav() === 'log-out'}>
               <Anim><Login/></Anim>
             </Match>
             <Match when={nav() === 'home'}>

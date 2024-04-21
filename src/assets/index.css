@@ -4,6 +4,7 @@
 
 * {
   @apply box-content selection:bg-red-700/35;
+  scrollbar-width: none;
 }
 
 html {

@@ -12,7 +12,7 @@ export default function(){
   root.appendChild(
     <div ref={hoverable}
       id="background-glow"
-      class="fixed rounded-full w-[100vmax] h-[100vmax] left-[-50vmax] top-[-50vmax]" // 
+      class="fixed rounded-full w-[100vmax] h-[100vmax] z-[-1] left-[-50vmax] top-[-50vmax]" // 
     />
   );
   const h_style = hoverable.style

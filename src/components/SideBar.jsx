@@ -1,7 +1,7 @@
 'use strict';
 import { For, createSignal } from 'solid-js';
 
-import { bar, sidebar, navigate } from '../helpers/state';
+import { bar, sidebar, nav, navigate } from '../helpers/state';
 import logo from '../assets/logo.png';
 import './SideBar.css';
 
@@ -56,27 +56,29 @@ function SideBar(components) {
   return (
     <>
       <div
-        class={'fixed top-0 left-0 bg-black/75 z-40 w-full h-full backdrop-blur-md min-[715px]:hidden'}
+        class={'fixed top-0 left-0 bg-black/50 z-40 w-full h-full backdrop-blur-md min-[715px]:hidden'}
         onclick={()=>{sidebar(false)}}
-        style={bar()?'animation:fadeIn 1s ease-out;animation-fill-mode:both;':'animation:fadeOut .25s ease-out;animation-fill-mode:both;'}
+        style={`animation:fade${bar()?'In 1.25':'Out .25'}s ease-out;animation-fill-mode:both;`}
       />
       <img
         src={logo}
-        class={'select-none fixed object-cover z-[500] m-0 ml-2 w-[12rem] h-[10vh] rounded-2xl left-1 top-[calc(.75vh+.25rem)] min-h-[90px] mb-[2.5vh]'}
-        style={bar()?'animation:rollOut .55s ease-out;animation-fill-mode:both':'animation:rollUp .40s ease-out;animation-fill-mode:both'}
+        class={'transition-all select-none fixed object-cover z-[500] m-0 ml-2 w-[12rem] h-[10vh] rounded-2xl left-1 top-[calc(.75vh+.25rem)] min-h-[90px] mb-[2.5vh]' + (nav()===''?' hidden':'')}
+        style={`animation:roll${bar()?'Out .55':'Up .40'}s ease-out;animation-fill-mode:both;`}
         onclick={()=>{sidebar(!bar())}}
       />
       <aside
         id='sidebar-menu'
-        class='hover:backdrop-opacity-80 hover:backdrop-hue-rotate-15 z-50 select-none overflow-scroll fixed backdrop-brightness-50 backdrop-opacity-90 backdrop-blur-sm p-1 box-content top-0 min-h-full h-full min-w-32 w-[13rem] transition-all'
+        class='flex flex-col overflow-clip hover:backdrop-opacity-90 z-50 select-none fixed backdrop-brightness-50 backdrop-blur-lg backdrop-saturate-200 p-1 box-content top-0 min-h-full h-full max-h-full min-w-32 w-[13rem] transition-all'
         style={bar()?'':'animation:slideOut .25s ease-out;animation-fill-mode:both'}
       >
         <div class='min-h-[90px] h-[10vh] mb-[2.5vh] rounded-2xl object-cover mt-[.75vh]'/>
-        <ul>
-          <For each={components}>
-            {(item)=>SideBarMaker(item)}
-          </For>
-        </ul>
+        <div class="max-h-max overflow-y-auto overflow-x-clip">
+          <ul>
+            <For each={components}>
+              {(item)=>SideBarMaker(item)}
+            </For>
+          </ul>
+        </div>
       </aside>
     </>
   );

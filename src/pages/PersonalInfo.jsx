@@ -103,7 +103,7 @@ export default function(){
 
   return(
     <div
-      class='ml-4 mt-4 grid gap-4 lg:grid-cols-3 max-lg:grid-cols-2 max-[540px]:grid-cols-1'>
+      class='pl-4 pt-4 grid gap-4 lg:grid-cols-3 max-lg:grid-cols-2 max-[540px]:grid-cols-1'>
       <For each={arr}>
         {_=>_(globalThis.__.PersonalInfo?globalThis.__info.PersonalInfo:json)}
       </For>

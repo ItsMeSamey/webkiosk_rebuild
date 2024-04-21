@@ -7,7 +7,7 @@ import { parsePersonalInfo } from '../helpers/parser'
 import './Login.css';
 
 
-export default async function(){
+export default function(){
   if (globalThis.__.Login) return globalThis.__.Login;
   const [bg, setBg] = createSignal(true);
   const username = <input type='text' autocomplete='enrollment-number' placeholder='Enrollment No.' id='username' />;
