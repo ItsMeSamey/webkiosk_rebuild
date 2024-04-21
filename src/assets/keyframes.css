@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Login Screen */
+@keyframes fadeIn {
+0% { opacity: 0; };
+10% {opacity: .25; };
+100% { opacity: .75; };
+}
+
+/* SideBar */
+@keyframes slideOut {
+  0% { transform: translateX(0%) }
+  100% { transform: translateX(-100%) }
+}
+@keyframes slideIn {
+  0% { transform: translateX(-100%) }
+  100% { transform: translateX(0%) }
+}
+
+/* SideBar Background */
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; display: none; }
+}
+
+/* Sidebar Logo */
+@keyframes rollUp {
+  100% {
+    left:-1.75rem;
+    top: -1.25rem;
+    border-radius: 100%;
+    transform: rotate(30deg);
+    @apply size-20;
+  }
+}
+@keyframes rollOut {
+  0% {
+    left:-1.75rem;
+    top: -1.25rem;
+    border-radius: 100%;
+    transform: rotate(30deg);
+    @apply size-20;
+  }
+}
+
+/* Content */
+@keyframes shrinkX {
+  100% { width: 0%; }
+}
+@keyframes expandX {
+  0% { width: 0%; }
+}
+
+

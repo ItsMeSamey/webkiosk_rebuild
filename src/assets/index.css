@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  @apply box-content;
+}
+
 html {
   background: #2f1818;
   height: 100%;
   color: #fff;
-  --mouse-xp: 50%;
-  --mouse-yp: 50%;
-  background: radial-gradient(circle at var(--mouse-xp) var(--mouse-yp), #2f1818, #100)
 }
 
 body {
@@ -20,7 +21,10 @@ body {
 }
 
 #root {
-  height: 100%;
+  @apply fixed overflow-scroll h-full w-full;
+  --x: 50%;
+  --y: 50%;
+  background: radial-gradient(circle at var(--x) var(--y), #241818, #100);
 }
 
 code {

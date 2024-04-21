@@ -2,12 +2,12 @@
 
 export default function(){
   globalThis.__ = {};
-  const html_style = document.getElementsByTagName('html')[0].style;
+  const root_style = document.getElementById('root').style;
   let x = 100/window.outerWidth;
   let y = 100/window.outerHeight;
 
   window.onmousemove = e => {
-    html_style.cssText = '--mouse-xp: '+x*e.screenX+'%; --mouse-yp: '+y*e.screenY+'%;';
+    root_style.cssText = '--x: '+x*e.screenX+'%; --y: '+y*e.screenY+'%;';
   }
   window.onresize = () => {
     // workaround when unmaxamizing window as normally setting values causes wrong values to be set (values before resize are set);
