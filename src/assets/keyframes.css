@@ -47,11 +47,11 @@
 }
 
 /* Content */
-@keyframes shrinkX {
-  100% { width: 0%; }
+@keyframes shrinkMarginLeft {
+  100% { margin-left: 0%; }
 }
-@keyframes expandX {
-  0% { width: 0%; }
+@keyframes expandMarginLeft {
+  0% { margin-left: 0%; }
 }
 
 

@@ -62,7 +62,7 @@ function SideBar(components) {
       />
       <img
         src={logo}
-        class={'fixed object-cover z-[500] m-0 ml-2 w-[12rem] h-[10vh] rounded-2xl left-1 top-[calc(.75vh+.25rem)] min-h-[90px] mb-[2.5vh]'}
+        class={'select-none fixed object-cover z-[500] m-0 ml-2 w-[12rem] h-[10vh] rounded-2xl left-1 top-[calc(.75vh+.25rem)] min-h-[90px] mb-[2.5vh]'}
         style={bar()?'animation:rollOut .55s ease-out;animation-fill-mode:both':'animation:rollUp .40s ease-out;animation-fill-mode:both'}
         onclick={()=>{sidebar(!bar())}}
       />
